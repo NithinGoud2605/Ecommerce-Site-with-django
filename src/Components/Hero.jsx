@@ -13,7 +13,7 @@ function Hero() {
         <Container>
           <Row className="align-items-center justify-content-center text-center">
             <Col md={8} lg={6}>
-              <h1 className="hero-title">Welcome to Handmade Market</h1>
+              <h1 className="hero-title">Welcome to Handmade HUB</h1>
               <p className="hero-text">
                 Discover unique, handcrafted products made with love and passion.
                 Support local artisans and find the perfect item just for you.
