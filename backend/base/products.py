@@ -1,7 +1,7 @@
 products = [
   {
     '_id': '1',
-    'name': 'Flowers',
+    'name': 'Flower bouquet',
     'image': '/images/Flowers.webp',
     'description':
       'Handmade flowers are delicately crafted from materials like paper, fabric, or clay, each petal shaped and assembled by hand to mimic the beauty of real blooms. These creations capture intricate details and vibrant colors, making them a unique, lasting alternative to fresh flowers.',
@@ -72,8 +72,8 @@ products = [
     'description':
       'Handmade woodcarving is a traditional art form where skilled artisans transform raw wood into intricate designs, sculptures, or functional items. Each piece is carefully carved and shaped by hand, showcasing natural wood grains and textures while highlighting the unique style and craftsmanship of the maker. Whether decorative or practical, woodcarving adds warmth, character, and timeless beauty to any space.',
     'price': 29.99,
-    'countInStock': 0,
-    'rating': 4,
+    'countInStock': 3,
+    'rating': 3,
     'numReviews': 12,
   },
 ]
