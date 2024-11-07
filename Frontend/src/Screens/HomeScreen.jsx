@@ -5,7 +5,7 @@ import Product from '../Components/Product';
 import Hero from '../Components/Hero';
 
 function HomeScreen() {
-  // Local state for products, loading, and error
+  
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

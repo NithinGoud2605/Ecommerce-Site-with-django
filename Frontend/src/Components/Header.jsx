@@ -1,25 +1,21 @@
-// Header.js
 import React from 'react';
-import {
-  Navbar,
-  Nav,
-  Container,
-  NavDropdown,
-  Form,
-  FormControl,
-  Button,
-} from 'react-bootstrap';
-import { FaShoppingCart, FaUser } from 'react-icons/fa';
+import { Navbar, Nav, Container, NavDropdown, Form, FormControl, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
+import { FaShoppingCart, FaUser } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 function Header() {
+  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  const navigate = useNavigate();
+
+  const logoutHandler = () => {
+    localStorage.removeItem('userInfo');
+    navigate('/login');
+  };
+
   return (
     <header>
-      <Navbar
-        expand="lg"
-        collapseOnSelect
-        className="custom-navbar"
-      >
+      <Navbar expand="lg" collapseOnSelect className="custom-navbar">
         <Container>
           {/* Brand / Logo */}
           <LinkContainer to="/">
@@ -30,17 +26,13 @@ function Header() {
                 width="200"
                 height="200"
                 className="d-inline-block align-top"
-              />{' '}
+              />
             </Navbar.Brand>
           </LinkContainer>
 
-          {/* Toggle for mobile view */}
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
-
-          {/* Navbar Links and Search */}
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              {/* Navigation Links */}
               <LinkContainer to="/">
                 <Nav.Link>Home</Nav.Link>
               </LinkContainer>
@@ -63,21 +55,30 @@ function Header() {
               <Button variant="outline-light">Search</Button>
             </Form>
 
-            {/* User and Cart Links */}
             <Nav>
               <LinkContainer to="/cart">
                 <Nav.Link>
-                  <FaShoppingCart /> Cart <span className="badge bg-secondary">0</span>
+                  <FaShoppingCart /> Cart
                 </Nav.Link>
               </LinkContainer>
-              <NavDropdown title={<FaUser />} id="username">
-                <LinkContainer to="/login">
-                  <NavDropdown.Item>Login</NavDropdown.Item>
-                </LinkContainer>
-                <LinkContainer to="/register">
-                  <NavDropdown.Item>Register</NavDropdown.Item>
-                </LinkContainer>
-              </NavDropdown>
+
+              {userInfo ? (
+                <NavDropdown title={userInfo.name} id="username">
+                  <LinkContainer to="/profile">
+                    <NavDropdown.Item>Profile</NavDropdown.Item>
+                  </LinkContainer>
+                  <NavDropdown.Item onClick={logoutHandler}>Logout</NavDropdown.Item>
+                </NavDropdown>
+              ) : (
+                <NavDropdown title={<FaUser />} id="username">
+                  <LinkContainer to="/login">
+                    <NavDropdown.Item>Login</NavDropdown.Item>
+                  </LinkContainer>
+                  <LinkContainer to="/register">
+                    <NavDropdown.Item>Register</NavDropdown.Item>
+                  </LinkContainer>
+                </NavDropdown>
+              )}
             </Nav>
           </Navbar.Collapse>
         </Container>
