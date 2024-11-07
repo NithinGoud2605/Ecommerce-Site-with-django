@@ -45,6 +45,29 @@ def registerUser(request):
     except Exception as e:
         return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def updateUserProfile(request):
+    print("Received request data:", request.data)
+    user = request.user
+
+    data = request.data
+    try:
+        user.first_name = data['name']
+        user.username = data['email']
+        user.email = data['email']
+
+        if 'password' in data and data['password'] != '':
+            user.password = make_password(data['password'])
+
+        user.save()
+        serializer = UserSerializerWithToken(user, many=False)
+        return Response(serializer.data)
+    except Exception as e:
+        print("Error updating profile:", str(e))
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getUserProfile(request):
