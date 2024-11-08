@@ -1,8 +1,9 @@
 import React from 'react';
 import { Navbar, Nav, Container, NavDropdown, Form, FormControl, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
-import { FaShoppingCart, FaUser } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaSearch } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../public/logo.png'; 
 
 function Header() {
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -15,16 +16,16 @@ function Header() {
 
   return (
     <header>
-      <Navbar expand="lg" collapseOnSelect className="custom-navbar">
+      <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect >
         <Container>
           {/* Brand / Logo */}
           <LinkContainer to="/">
             <Navbar.Brand>
               <img
                 alt="Logo"
-                src="../public/logo.png" // Replace with your logo path
-                width="200"
-                height="200"
+                src={logo}
+                width="200" // Set a fixed width that fits the navbar
+                height="auto" // Maintain aspect ratio
                 className="d-inline-block align-top"
               />
             </Navbar.Brand>
@@ -52,30 +53,41 @@ function Header() {
                 className="me-2"
                 aria-label="Search"
               />
-              <Button variant="outline-light">Search</Button>
+              <Button variant="outline-light"><FaSearch /></Button>
             </Form>
 
             <Nav>
               <LinkContainer to="/cart">
-                <Nav.Link>
-                  <FaShoppingCart /> Cart
+                <Nav.Link className="d-flex align-items-center">
+                  <FaShoppingCart className="me-1" /> Cart
                 </Nav.Link>
               </LinkContainer>
 
               {userInfo ? (
-                <NavDropdown title={userInfo.name} id="username">
+                <NavDropdown title={userInfo.name} id="username" className="ms-2">
                   <LinkContainer to="/profile">
                     <NavDropdown.Item>Profile</NavDropdown.Item>
                   </LinkContainer>
                   <NavDropdown.Item onClick={logoutHandler}>Logout</NavDropdown.Item>
                 </NavDropdown>
               ) : (
-                <NavDropdown title={<FaUser />} id="username">
-                  <LinkContainer to="/login">
-                    <NavDropdown.Item>Login</NavDropdown.Item>
+                <LinkContainer to="/login">
+                  <Nav.Link className="d-flex align-items-center">
+                    <FaUser className="me-1" /> Sign In
+                  </Nav.Link>
+                </LinkContainer>
+              )}
+
+              {userInfo && userInfo.isAdmin && (
+                <NavDropdown title="Admin" id="adminmenu" className="ms-2">
+                  <LinkContainer to="/admin/userlist">
+                    <NavDropdown.Item>Manage Users</NavDropdown.Item>
                   </LinkContainer>
-                  <LinkContainer to="/register">
-                    <NavDropdown.Item>Register</NavDropdown.Item>
+                  <LinkContainer to="/admin/productlist">
+                    <NavDropdown.Item>Manage Products</NavDropdown.Item>
+                  </LinkContainer>
+                  <LinkContainer to="/admin/orderlist">
+                    <NavDropdown.Item>Manage Orders</NavDropdown.Item>
                   </LinkContainer>
                 </NavDropdown>
               )}

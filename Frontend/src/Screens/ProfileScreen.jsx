@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
 import { useNavigate } from 'react-router-dom';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import { Form, Button, Row, Col, Table } from 'react-bootstrap';
+import axios from 'axios';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
-import axios from 'axios';
 
 function ProfileScreen() {
   const [name, setName] = useState('');
@@ -14,6 +16,9 @@ function ProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [errorOrders, setErrorOrders] = useState(null);
 
   const navigate = useNavigate();
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -30,8 +35,8 @@ function ProfileScreen() {
         const config = {
           headers: {
             'Content-type': 'application/json',
-            Authorization: `Bearer ${userInfo.token}`
-          }
+            Authorization: `Bearer ${userInfo.token}`,
+          },
         };
         const { data } = await axios.get(`/api/users/profile/`, config);
         setName(data.name);
@@ -47,11 +52,32 @@ function ProfileScreen() {
       }
     };
 
-    // Run only if userInfo is defined
+    const fetchOrders = async () => {
+      try {
+        setLoadingOrders(true);
+        const config = {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        };
+        const { data } = await axios.get('/api/orders/myorders/', config);
+        setOrders(data);
+        setLoadingOrders(false);
+      } catch (error) {
+        setErrorOrders(
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message
+        );
+        setLoadingOrders(false);
+      }
+    };
+
     if (userInfo) {
       fetchUserDetails();
+      fetchOrders();
     }
-  }, [navigate]); // Remove `userInfo` from dependency array
+  }, [navigate]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -64,8 +90,8 @@ function ProfileScreen() {
         const config = {
           headers: {
             'Content-type': 'application/json',
-            Authorization: `Bearer ${userInfo.token}`
-          }
+            Authorization: `Bearer ${userInfo.token}`,
+          },
         };
         const { data } = await axios.put(
           `/api/users/profile/update/`,
@@ -141,6 +167,49 @@ function ProfileScreen() {
             Update
           </Button>
         </Form>
+      </Col>
+
+      <Col md={9}>
+        <h2>My Orders</h2>
+        {loadingOrders ? (
+          <Loader />
+        ) : errorOrders ? (
+          <Message variant="danger">{errorOrders}</Message>
+        ) : (
+          <Table striped responsive className="table-sm">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Paid</th>
+                <th>Delivered</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order._id}>
+                  <td>{order._id}</td>
+                  <td>{order.createdAt.substring(0, 10)}</td>
+                  <td>${order.totalPrice}</td>
+                  <td>
+                    {order.isPaid ? (
+                      order.paidAt.substring(0, 10)
+                    ) : (
+                      <i className="fas fa-times" style={{ color: 'red' }}></i>
+                    )}
+                  </td>
+                  <td>
+                    <Link to={`/order/${order._id}`} className="btn btn-sm btn-light">
+                      Details
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
       </Col>
     </Row>
   );
