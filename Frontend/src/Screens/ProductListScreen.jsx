@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Row, Col } from 'react-bootstrap';
+import { Table, Button, Row, Col, Pagination } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../components/Loader';
@@ -11,7 +11,9 @@ function ProductListScreen() {
   const [error, setError] = useState(null);
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [errorCreate, setErrorCreate] = useState(null);
-  const [hasFetched, setHasFetched] = useState(false); // Prevents continuous calls
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasFetched, setHasFetched] = useState(false);
   const navigate = useNavigate();
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
@@ -22,27 +24,29 @@ function ProductListScreen() {
     }
 
     if (!hasFetched) {
-      const fetchProducts = async () => {
-        try {
-          setLoading(true);
-          const config = {
-            headers: {
-              Authorization: `Bearer ${userInfo.token}`
-            }
-          };
-          const { data } = await axios.get('/api/products/', config);
-          setProducts(data);
-          setLoading(false);
-          setHasFetched(true); // Prevents repeated fetches
-        } catch (err) {
-          setError(err.response ? err.response.data.detail : 'Error loading products');
-          setLoading(false);
+      fetchProducts(page);
+      setHasFetched(true);
+    }
+  }, [navigate, userInfo, hasFetched, page]);
+
+  const fetchProducts = async (page = 1) => {
+    try {
+      setLoading(true);
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`
         }
       };
-
-      fetchProducts();
+      const { data } = await axios.get(`/api/products/?page=${page}`, config);
+      setProducts(data.products);
+      setPage(data.page);
+      setTotalPages(data.pages);
+      setLoading(false);
+    } catch (err) {
+      setError(err.response ? err.response.data.detail : 'Error loading products');
+      setLoading(false);
     }
-  }, [navigate, userInfo, hasFetched]);
+  };
 
   const createProductHandler = async () => {
     if (window.confirm('Are you sure you want to create a new product?')) {
@@ -66,12 +70,12 @@ function ProductListScreen() {
   const deleteProductHandler = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
+        setLoading(true);
         const config = {
           headers: {
             Authorization: `Bearer ${userInfo.token}`
           }
         };
-        setLoading(true);
         await axios.delete(`/api/products/delete/${id}/`, config);
         setProducts(products.filter(product => product._id !== id));
         setLoading(false);
@@ -80,6 +84,11 @@ function ProductListScreen() {
         setLoading(false);
       }
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    setHasFetched(false); // Allow fetching on page change
   };
 
   return (
@@ -97,43 +106,52 @@ function ProductListScreen() {
 
       {loadingCreate && <Loader />}
       {errorCreate && <Message variant="danger">{errorCreate}</Message>}
-      
+
       {loading ? (
         <Loader />
       ) : error ? (
         <Message variant="danger">{error}</Message>
       ) : (
-        <Table striped bordered hover responsive className="table-sm">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>NAME</th>
-              <th>PRICE</th>
-              <th>CATEGORY</th>
-              <th>BRAND</th>
-              <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map(product => (
-              <tr key={product._id}>
-                <td>{product._id}</td>
-                <td>{product.name}</td>
-                <td>${product.price}</td>
-                <td>{product.category}</td>
-                <td>{product.brand}</td>
-                <td>
-                  <Button variant="light" className="btn-sm" onClick={() => navigate(`/admin/product/${product._id}/edit`)}>
-                    <i className="fas fa-edit"></i>
-                  </Button>
-                  <Button variant="danger" className="btn-sm" onClick={() => deleteProductHandler(product._id)}>
-                    <i className="fas fa-trash"></i>
-                  </Button>
-                </td>
+        <>
+          <Table striped bordered hover responsive className="table-sm">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>NAME</th>
+                <th>PRICE</th>
+                <th>CATEGORY</th>
+                <th>BRAND</th>
+                <th>ACTIONS</th>
               </tr>
+            </thead>
+            <tbody>
+              {products.map(product => (
+                <tr key={product._id}>
+                  <td>{product._id}</td>
+                  <td>{product.name}</td>
+                  <td>${product.price}</td>
+                  <td>{product.category}</td>
+                  <td>{product.brand}</td>
+                  <td>
+                    <Button variant="light" className="btn-sm" onClick={() => navigate(`/admin/product/${product._id}/edit`)}>
+                      <i className="fas fa-edit"></i>
+                    </Button>
+                    <Button variant="danger" className="btn-sm" onClick={() => deleteProductHandler(product._id)}>
+                      <i className="fas fa-trash"></i>
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <Pagination>
+            {[...Array(totalPages).keys()].map(x => (
+              <Pagination.Item key={x + 1} active={x + 1 === page} onClick={() => handlePageChange(x + 1)}>
+                {x + 1}
+              </Pagination.Item>
             ))}
-          </tbody>
-        </Table>
+          </Pagination>
+        </>
       )}
     </div>
   );

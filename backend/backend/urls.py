@@ -22,10 +22,17 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    #path('api/', include('base.urls')), 
+
+    # Main API URL includes for products, users, and orders
     path('api/products/', include('base.urls.product_urls')),
     path('api/users/', include('base.urls.user_urls')),
     path('api/orders/', include('base.urls.order_urls')),
+
+    # Uncomment if you have additional APIs to include later
+    # path('api/', include('base.urls')),  
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)
+# Static and media URL configurations to serve images/files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

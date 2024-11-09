@@ -1,18 +1,20 @@
+// Rating.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
 
-function Rating({ value, text }) {
-  const stars = [1, 2, 3, 4, 5];
+function Rating({ value = 0, text, color = '#f8e825' }) {
+  const numericValue = Number(value);
+
   return (
     <div className="rating">
-      {stars.map((star) => (
-        <span key={star}>
+      {Array.from({ length: 5 }, (_, index) => (
+        <span key={index}>
           <i
-            style={{ color: '#f8e825' }}
+            style={{ color }}
             className={
-              value >= star
+              numericValue >= index + 1
                 ? 'fas fa-star'
-                : value >= star - 0.5
+                : numericValue >= index + 0.5
                 ? 'fas fa-star-half-alt'
                 : 'far fa-star'
             }
@@ -25,8 +27,9 @@ function Rating({ value, text }) {
 }
 
 Rating.propTypes = {
-  value: PropTypes.number.isRequired,
-  text: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  text: PropTypes.string,
+  color: PropTypes.string,
 };
 
 export default Rating;
