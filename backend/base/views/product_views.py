@@ -67,24 +67,15 @@ def deleteProduct(request, pk):
 @api_view(['PUT'])
 @permission_classes([IsAdminUser])
 def updateProduct(request, pk):
-    try:
-        data = request.data
-        product = Product.objects.get(_id=pk)
+    data = request.data
+    product = Product.objects.get(_id=pk)
 
-        product.name = data['name']
-        product.price = data['price']
-        product.brand = data['brand']
-        product.countInStock = data['countInStock']
-        product.category = data['category']
-        product.description = data['description']
+    product.name = data['name']
+    product.price = data['price']
+    product.countInStock = data['countInStock']
+    product.description = data['description']
 
-        product.save()
+    product.save()
 
-        serializer = ProductSerializer(product, many=False)
-        return Response(serializer.data)
-    except Product.DoesNotExist:
-        return Response({'detail': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        logger.error(f"Error fetching product with ID {pk}: {e}")
-        return Response({'detail': 'Error fetching product'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+    serializer = ProductSerializer(product, many=False)
+    return Response(serializer.data)
