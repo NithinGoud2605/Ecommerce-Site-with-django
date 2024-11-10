@@ -76,28 +76,28 @@ function ProductScreen() {
         <div>
           <Row>
             <Col md={6}>
-              <Image src={product.image} alt={product.name} fluid rounded />
+              <Image src={product.image} alt={product.name} fluid rounded className='shadow-sm' />
             </Col>
             <Col md={3}>
               <ListGroup variant="flush">
-                <ListGroup.Item>
-                  <h3>{product.name}</h3>
+                <ListGroup.Item className='border-0'>
+                  <h3 className='text-primary'>{product.name}</h3>
                 </ListGroup.Item>
-                <ListGroup.Item>
+                <ListGroup.Item className='border-0'>
                   <Rating value={Number(product.rating)} text={`${product.numReviews || 0} reviews`} color={'#f8e825'} />
                 </ListGroup.Item>
-                <ListGroup.Item>
+                <ListGroup.Item className='border-0'>
                   <strong>Price:</strong> ${product.price}
                 </ListGroup.Item>
-                <ListGroup.Item>
+                <ListGroup.Item className='border-0'>
                   <strong>Description:</strong> {product.description}
                 </ListGroup.Item>
               </ListGroup>
             </Col>
             <Col md={3}>
-              <Card>
+              <Card className='shadow-sm'>
                 <ListGroup variant='flush'>
-                  <ListGroup.Item>
+                  <ListGroup.Item className='border-0'>
                     <Row>
                       <Col>Price:</Col>
                       <Col>
@@ -105,18 +105,18 @@ function ProductScreen() {
                       </Col>
                     </Row>
                   </ListGroup.Item>
-                  <ListGroup.Item>
+                  <ListGroup.Item className='border-0'>
                     <Row>
                       <Col>Status:</Col>
                       <Col>{product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}</Col>
                     </Row>
                   </ListGroup.Item>
                   {product.countInStock > 0 && (
-                    <ListGroup.Item>
+                    <ListGroup.Item className='border-0'>
                       <Row>
                         <Col>Qty</Col>
                         <Col xs='auto' className='my-1'>
-                          <Form.Control as="select" value={qty} onChange={(e) => setQty(Number(e.target.value))}>
+                          <Form.Control as="select" value={qty} onChange={(e) => setQty(Number(e.target.value))} className='rounded'>
                             {[...Array(product.countInStock).keys()].map((x) => (
                               <option key={x + 1} value={x + 1}>
                                 {x + 1}
@@ -127,8 +127,8 @@ function ProductScreen() {
                       </Row>
                     </ListGroup.Item>
                   )}
-                  <ListGroup.Item>
-                    <Button onClick={addToCartHandler} className='btn-block' disabled={product.countInStock === 0} type='button'>
+                  <ListGroup.Item className='border-0'>
+                    <Button onClick={addToCartHandler} className='btn-block btn-primary' disabled={product.countInStock === 0} type='button'>
                       Add to Cart
                     </Button>
                   </ListGroup.Item>
@@ -138,12 +138,12 @@ function ProductScreen() {
           </Row>
           <Row className='mt-4'>
             <Col md={6}>
-              <h4>Customer Reviews</h4>
+              <h4 className='text-primary'>Customer Reviews</h4>
               {product.reviews && product.reviews.length === 0 && <Alert variant='info'>No reviews yet. Be the first to review!</Alert>}
               <ListGroup variant='flush'>
                 {product.reviews &&
                   product.reviews.map((review) => (
-                    <ListGroup.Item key={review._id}>
+                    <ListGroup.Item key={review._id} className='border-0'>
                       <div className="d-flex justify-content-between">
                         <strong>{review.name}</strong>
                         <Rating value={Number(review.rating)} color='#f8e825' />
@@ -153,16 +153,16 @@ function ProductScreen() {
                       <hr />
                     </ListGroup.Item>
                   ))}
-                <ListGroup.Item>
-                  <h4>Leave a Review</h4>
+                <ListGroup.Item className='border-0'>
+                  <h4 className='text-primary'>Leave a Review</h4>
                   {loadingReview && <Loader />}
                   {successReview && <Message variant='success'>Review submitted successfully!</Message>}
                   {errorReview && <Message variant='danger'>{errorReview}</Message>}
                   {userInfo ? (
-                    <Form onSubmit={submitHandler}>
+                    <Form onSubmit={submitHandler} className='mt-3'>
                       <Form.Group controlId='rating' className="mb-3">
                         <Form.Label>Rating</Form.Label>
-                        <Form.Control as='select' value={rating} onChange={(e) => setRating(Number(e.target.value))}>
+                        <Form.Control as='select' value={rating} onChange={(e) => setRating(Number(e.target.value))} className='rounded'>
                           <option value=''>Select...</option>
                           <option value='1'>1 - Poor</option>
                           <option value='2'>2 - Fair</option>
@@ -179,9 +179,10 @@ function ProductScreen() {
                           value={comment}
                           placeholder="Share your thoughts about the product"
                           onChange={(e) => setComment(e.target.value)}
+                          className='rounded'
                         ></Form.Control>
                       </Form.Group>
-                      <Button disabled={loadingReview} type='submit' variant='primary'>
+                      <Button disabled={loadingReview} type='submit' variant='primary' className='rounded'>
                         Submit Review
                       </Button>
                     </Form>

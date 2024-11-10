@@ -13,24 +13,32 @@ logger = logging.getLogger(__name__)
 @api_view(['GET'])
 def getProducts(request):
     query = request.query_params.get('keyword', '')
+    sort_by = request.query_params.get('sort_by', 'name')  # Default sort by name
+    order = request.query_params.get('order', 'asc')  # Default order ascending
 
-    products = Product.objects.filter(name__icontains=query).order_by('-createdAt')
+    products = Product.objects.filter(name__icontains=query)
 
+    # Sorting logic
+    if sort_by in ['price', 'rating', 'name']:
+        if order == 'desc':
+            sort_by = f'-{sort_by}'
+        products = products.order_by(sort_by)
+    else:
+        # Default sorting
+        products = products.order_by('name')
+
+    # Pagination
     page = request.query_params.get('page', 1)
     paginator = Paginator(products, 8)
 
     try:
         products = paginator.page(page)
-    except PageNotAnInteger:
+    except (EmptyPage, PageNotAnInteger):
         products = paginator.page(1)
-    except EmptyPage:
-        products = paginator.page(paginator.num_pages)
 
     page = int(page)
-    print('Page:', page)
     serializer = ProductSerializer(products, many=True, context={'request': request})
     return Response({'products': serializer.data, 'page': page, 'pages': paginator.num_pages})
-
 
 @api_view(['GET'])
 def getProduct(request, pk):

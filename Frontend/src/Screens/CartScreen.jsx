@@ -109,7 +109,7 @@ function CartScreen() {
   return (
     <Row>
       <Col md={8}>
-        <h1>Shopping Cart</h1>
+        <h1 className='text-primary'>Shopping Cart</h1>
         {cartItems.length === 0 ? (
           <Message variant='info'>
             Your cart is empty <Link to='/'>Go Back</Link>
@@ -117,15 +117,15 @@ function CartScreen() {
         ) : (
           <ListGroup variant='flush'>
             {cartItems.map((item) => (
-              <ListGroup.Item key={item.product}>
+              <ListGroup.Item key={item.product} className='border-0 shadow-sm mb-2'>
                 <Row className='align-items-center'>
                   <Col md={2}>
-                    <Image src={item.image} alt={item.name} fluid rounded />
+                    <Image src={item.image} alt={item.name} fluid rounded className='border' />
                   </Col>
                   <Col md={3}>
-                    <Link to={`/product/${item.product}`}>{item.name}</Link>
+                    <Link to={`/product/${item.product}`} className='text-decoration-none text-dark'>{item.name}</Link>
                   </Col>
-                  <Col md={2}>${item.price}</Col>
+                  <Col md={2} className='text-success'>${item.price}</Col>
                   <Col md={3}>
                     <Form.Control
                       as='select'
@@ -140,6 +140,7 @@ function CartScreen() {
                         setCartItems(updatedCartItems);
                         saveCartToLocalStorage(updatedCartItems);
                       }}
+                      className='rounded'
                     >
                       {[...Array(item.countInStock).keys()].map((x) => (
                         <option key={x + 1} value={x + 1}>
@@ -151,8 +152,9 @@ function CartScreen() {
                   <Col md={1}>
                     <Button
                       type='button'
-                      variant='light'
+                      variant='danger'
                       onClick={() => removeFromCartHandler(item.product)}
+                      className='btn-sm'
                     >
                       <i className='fas fa-trash'></i>
                     </Button>
@@ -165,20 +167,20 @@ function CartScreen() {
       </Col>
 
       <Col md={4}>
-        <Card>
+        <Card className='shadow-sm'>
           <ListGroup variant='flush'>
-            <ListGroup.Item>
-              <h2>
+            <ListGroup.Item className='border-0'>
+              <h2 className='text-center'>
                 Subtotal ({cartItems.reduce((acc, item) => acc + item.qty, 0)}) items
               </h2>
-              ${cartItems
-                .reduce((acc, item) => acc + item.qty * item.price, 0)
-                .toFixed(2)}
+              <h4 className='text-center text-success'>
+                ${cartItems.reduce((acc, item) => acc + item.qty * item.price, 0).toFixed(2)}
+              </h4>
             </ListGroup.Item>
-            <ListGroup.Item>
+            <ListGroup.Item className='border-0'>
               <Button
                 type='button'
-                className='btn-block'
+                className='btn-block btn-primary'
                 disabled={cartItems.length === 0}
                 onClick={checkoutHandler}
               >
