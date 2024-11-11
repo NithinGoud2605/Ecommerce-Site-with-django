@@ -1,14 +1,13 @@
-// HomeScreen.js
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Pagination, Form, Container, Button } from 'react-bootstrap';
-import axios from 'axios';
+import axiosInstance from '../axiosInstance';
 import Product from '../Components/Product';
 import Loader from '../Components/Loader';
 import Message from '../Components/Message';
 import Hero from '../Components/Hero';
 import Testimonials from '../Components/Testimonials';
 import { useLocation, useNavigate } from 'react-router-dom';
-import '../index.css'; // Ensure you import custom styles
+import '../index.css';
 
 function HomeScreen() {
   const [products, setProducts] = useState([]);
@@ -16,8 +15,8 @@ function HomeScreen() {
   const [error, setError] = useState();
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
-  const [sortBy, setSortBy] = useState('name'); // Default sort by name
-  const [order, setOrder] = useState('asc'); // Default order ascending
+  const [sortBy, setSortBy] = useState('name');
+  const [order, setOrder] = useState('asc');
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -28,14 +27,15 @@ function HomeScreen() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get(
-          `/api/products?keyword=${keyword}&page=${page}&sort_by=${sortBy}&order=${order}`
+        const { data } = await axiosInstance.get(
+          `/api/products/?keyword=${keyword}&page=${page}&sort_by=${sortBy}&order=${order}`
         );
         setProducts(data.products);
         setPages(data.pages);
         setLoading(false);
       } catch (err) {
-        setError(err.response ? err.response.data.detail : 'Error loading products');
+        console.error("Error fetching products:", err);
+        setError(err.response?.data?.detail || 'Error loading products');
         setLoading(false);
       }
     };

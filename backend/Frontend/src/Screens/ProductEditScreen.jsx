@@ -20,6 +20,7 @@ function ProductEditScreen() {
     const [error, setError] = useState(null);
     const [loadingUpdate, setLoadingUpdate] = useState(false);
     const [errorUpdate, setErrorUpdate] = useState(null);
+    const [successUpdate, setSuccessUpdate] = useState(false);
 
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
@@ -64,6 +65,7 @@ function ProductEditScreen() {
                 description,
             });
             setLoadingUpdate(false);
+            setSuccessUpdate(true); // Set success state
             navigate('/admin/productlist');
         } catch (err) {
             setErrorUpdate(err.response?.data?.detail || 'Error updating product');
@@ -84,11 +86,12 @@ function ProductEditScreen() {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            setImage(data);
+            setImage(data.image); // Ensure data contains the image URL
             setUploading(false);
+            e.target.value = null; // Reset file input
         } catch (err) {
             setUploading(false);
-            setError('Error uploading image');
+            setError(err.response?.data?.detail || 'Error uploading image');
         }
     };
 
@@ -103,6 +106,7 @@ function ProductEditScreen() {
                     <h1>Edit Product</h1>
                     {loadingUpdate && <Loader />}
                     {errorUpdate && <Message variant='danger'>{errorUpdate}</Message>}
+                    {successUpdate && <Message variant='success'>Product updated successfully</Message>}
                     {loading ? (
                         <Loader />
                     ) : error ? (
