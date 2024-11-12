@@ -82,14 +82,14 @@ USE_I18N = True
 USE_TZ = True
 
 # Static and media files
+
+# Static files settings
 STATIC_URL = '/static/'
-MEDIA_URL = 'https://handmadehub-bucket.s3.amazonaws.com/'  # Production media URL (S3)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATICFILES_DIRS = [
-    BASE_DIR / 'frontend' / 'dist',  # Frontend build directory for static files
-]
-
-STATIC_ROOT = BASE_DIR / 'backend' / 'staticfiles'  # Local storage for static files
+# Add a conditional check for the `dist` directory
+FRONTEND_DIST_DIR = BASE_DIR / 'frontend' / 'dist'
+STATICFILES_DIRS = [FRONTEND_DIST_DIR] if FRONTEND_DIST_DIR.exists() else []  # Local storage for static files
 MEDIA_ROOT = None  # No local storage for media files as we’re using S3
 
 # AWS S3 Settings for static and media files
