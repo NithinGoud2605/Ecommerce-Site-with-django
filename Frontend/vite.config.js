@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   base: '/static/',
   build: {
-    outDir: '../backend/staticfiles',  // Or a suitable path Django can serve
+    outDir: './backend/staticfiles', // Or a suitable path Django can serve
   },
   server: {
     proxy: {
