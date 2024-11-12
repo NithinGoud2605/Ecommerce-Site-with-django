@@ -89,7 +89,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'frontend' / 'dist',  # Frontend build directory for static files
 ]
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Local storage for static files
+STATIC_ROOT = BASE_DIR / 'backend' / 'staticfiles'  # Local storage for static files
 MEDIA_ROOT = None  # No local storage for media files as we’re using S3
 
 # AWS S3 Settings for static and media files
