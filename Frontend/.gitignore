@@ -17,12 +17,6 @@ __pycache__/
 db.sqlite3
 .env
 
-# Django static and media files (if generated on the server)
-staticfiles/
-media/
-
-# Frontend build files (optional if generated on the server)
-frontend/dist/
 
 # Editor directories and files
 .vscode/
