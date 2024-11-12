@@ -1,1 +1,1 @@
-web: python backend/manage.py collectstatic --noinput && gunicorn backend.wsgi --log-file -
+web: gunicorn backend.wsgi --log-file -
