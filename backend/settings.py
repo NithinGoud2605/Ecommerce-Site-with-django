@@ -110,7 +110,7 @@ STATIC_URL = '/static/'
 MEDIA_URL = 'https://handmadehub-bucket.s3.amazonaws.com/'  # Production media URL (S3)
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'frontend' / 'dist',
+    BASE_DIR / 'frontend' / 'dist' / 'assets',
 ]
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # Local storage for static files
