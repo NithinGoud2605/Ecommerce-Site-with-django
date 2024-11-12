@@ -26,7 +26,7 @@ function Header() {
 
   return (
     <header>
-      <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect fixed="top" className="custom-navbar">
+      <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect className="custom-navbar">
         <Container>
           <LinkContainer to="/">
             <Navbar.Brand>
@@ -95,6 +95,8 @@ function Header() {
           </Navbar.Collapse>
         </Container>
       </Navbar>
+
+
     </header>
   );
 }
