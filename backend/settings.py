@@ -48,9 +48,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'frontend/dist')
-        ],  # Directory for frontend templates
+        'DIRS': [BASE_DIR / 'frontend' / 'dist'],  # Updated with Path syntax
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -62,6 +60,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
@@ -91,7 +90,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Local storage for static files
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'Frontend', 'dist')
+    BASE_DIR / 'frontend' / 'dist' 
 ]
 
 
