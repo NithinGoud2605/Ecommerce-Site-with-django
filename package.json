@@ -2,9 +2,6 @@
   "engines": {
   "node": "18.x",  
   "npm": "latest"
-},
-"scripts": {
-  "heroku-postbuild": "cd frontend && npm install && npm run build"
 }
 
 
