@@ -89,8 +89,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Local storage for static files
 STATICFILES_DIRS = [
-    BASE_DIR / 'frontend/dist'
+    os.path.join(BASE_DIR, 'frontend', 'dist')
 ]
+
 
 # Media files settings
 MEDIA_URL = '/images/'
