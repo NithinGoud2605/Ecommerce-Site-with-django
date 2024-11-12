@@ -5,8 +5,7 @@ export default defineConfig({
   plugins: [react()],
   base: '/static/',
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',  // This ensures static files are in 'dist/assets'
+    outDir: '../backend/staticfiles',  // Or a suitable path Django can serve
   },
   server: {
     proxy: {
