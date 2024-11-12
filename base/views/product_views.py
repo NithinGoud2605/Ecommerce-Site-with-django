@@ -42,6 +42,7 @@ def getProducts(request):
     return Response({'products': serializer.data, 'page': page, 'pages': paginator.num_pages})
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def getProduct(request, pk):
     try:
         product = Product.objects.get(_id=pk)
