@@ -89,7 +89,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Local storage for static files
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'frontend', 'dist')
+    os.path.join(BASE_DIR, 'Frontend', 'dist')
 ]
 
 
