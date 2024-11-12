@@ -47,7 +47,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['../Frontend/dist'],  # Directory for frontend templates
+        'DIRS': [BASE_DIR / 'frontend' / 'dist'],  # Directory for frontend templates
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -90,7 +90,7 @@ STATIC_URL = '/static/'
 MEDIA_URL = 'https://handmadehub-bucket.s3.amazonaws.com/'  # Production media URL (S3)
 
 STATICFILES_DIRS = [
-    '../Frontend/dist',  # Frontend build directory for static files
+    BASE_DIR / 'frontend' / 'dist',  # Frontend build directory for static files
 ]
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # Local storage for static files
