@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -63,14 +64,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'HandmadeHUB',
-        'USER': 'NithinGoud',
-        'PASSWORD': os.environ.get('DB_PASS'),
-        'HOST': 'handmadehub-identifier.c78sq0okmp1j.us-east-2.rds.amazonaws.com',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(
+        default=f"postgres://NithinGoud:{os.environ.get('DB_PASS')}@handmadehub-identifier.c78sq0okmp1j.us-east-2.rds.amazonaws.com:5432/HandmadeHUB"
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
