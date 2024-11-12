@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger  # Import for pagination
 from django.db.models import Q  
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated,AllowAny, IsAdminUser
 from base.models import Product
 from base.serializers import ProductSerializer
 import logging
@@ -11,6 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
+@permission_classes([AllowAny]) 
 def getProducts(request):
     query = request.query_params.get('keyword', '')
     sort_by = request.query_params.get('sort_by', 'name')  # Default sort by name
