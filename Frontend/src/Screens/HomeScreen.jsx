@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Pagination, Form, Container, Button } from 'react-bootstrap';
+import { Row, Col, Pagination, Form, Container } from 'react-bootstrap';
 import axiosInstance from '../axiosInstance';
 import Product from '../Components/Product';
 import Loader from '../Components/Loader';
@@ -12,7 +12,7 @@ import '../index.css';
 function HomeScreen() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState();
+  const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [sortBy, setSortBy] = useState('name');
@@ -30,12 +30,12 @@ function HomeScreen() {
         const { data } = await axiosInstance.get(
           `/api/products/?keyword=${keyword}&page=${page}&sort_by=${sortBy}&order=${order}`
         );
-        setProducts(data.products);
-        setPages(data.pages);
+        setProducts(data.products || []);
+        setPages(data.pages || 1);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching products:", err);
-        setError(err.response?.data?.detail || 'Error loading products');
+        setError(err.response?.data?.detail || err.message || 'Error loading products');
         setLoading(false);
       }
     };
@@ -80,11 +80,12 @@ function HomeScreen() {
             </Form.Control>
           </Form.Group>
         </div>
+        
         {loading ? (
           <Loader />
         ) : error ? (
           <Message variant="danger">{error}</Message>
-        ) : (
+        ) : products.length > 0 ? (
           <>
             <Row className="product-grid">
               {products.map(product => (
@@ -107,6 +108,8 @@ function HomeScreen() {
               </Pagination>
             )}
           </>
+        ) : (
+          <Message variant="info">No products found</Message>
         )}
       </Container>
       <Testimonials />
