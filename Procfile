@@ -1,1 +1,1 @@
-web: npm install --prefix frontend --legacy-peer-deps && npm run build --prefix frontend && python backend/manage.py collectstatic --noinput && gunicorn backend.wsgi --log-file -
+web: npm install --prefix Frontend && npm run build --prefix Frontend && python backend/manage.py collectstatic --noinput && gunicorn backend.wsgi --log-file -
