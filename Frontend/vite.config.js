@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   base: '/static/', // Align with Django's STATIC_URL
   build: {
-    outDir: '../backend/staticfiles',  // Output directly to Django's static files directory
+    outDir: 'dist',  // Output to the dist directory within the frontend directory
     emptyOutDir: true,
     rollupOptions: {
       output: {

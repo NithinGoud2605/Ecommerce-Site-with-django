@@ -87,10 +87,15 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Add a conditional check for the `dist` directory
-FRONTEND_DIST_DIR = BASE_DIR / 'frontend' / 'dist'
-STATICFILES_DIRS = [FRONTEND_DIST_DIR] if FRONTEND_DIST_DIR.exists() else []  # Local storage for static files
+# Local storage for static files
+STATICFILES_DIRS = [
+    BASE_DIR / 'frontend/dist'
+]
+
+# Media files settings
+MEDIA_URL = '/images/'
 MEDIA_ROOT = None  # No local storage for media files as we’re using S3
+
 
 # AWS S3 Settings for static and media files
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
