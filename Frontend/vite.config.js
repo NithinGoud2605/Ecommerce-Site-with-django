@@ -3,18 +3,18 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/static/',  // Matches Django's STATIC_URL
+  base: '/static/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',  // This ensures static files are in 'dist/assets'
+  },
   server: {
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',  // Backend URL for local dev
+        target: 'http://127.0.0.1:8000',  // Replace with your backend server URL
         changeOrigin: true,
         secure: false,
       },
     },
   },
-  build: {
-    outDir: 'dist',  // Ensures build output is in 'frontend/dist'
-    assetsDir: 'assets'  // Subdirectory for static assets
-  }
 });

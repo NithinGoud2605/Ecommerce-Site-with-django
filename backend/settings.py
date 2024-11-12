@@ -5,7 +5,7 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-lj689gx2e0*1wpxms9&!7#v=2-fsy^7(!3mgnzo68fe8ox0d(u'
-DEBUG = False  # Set to True for local development if needed
+DEBUG = True  # Set to True for local development if needed
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'handmadehub-4c471829f515.herokuapp.com']  # Add production domain here
 
 INSTALLED_APPS = [
@@ -28,9 +28,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
-    'rest_framework.permissions.AllowAny',  # Change as per requirement
-]
 }
 
 MIDDLEWARE = [
@@ -62,23 +59,6 @@ TEMPLATES = [
         },
     },
 ]
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG' if DEBUG else 'ERROR',
-        },
-    },
-}
-
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
@@ -110,7 +90,7 @@ STATIC_URL = '/static/'
 MEDIA_URL = 'https://handmadehub-bucket.s3.amazonaws.com/'  # Production media URL (S3)
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'frontend' / 'dist' / 'assets',
+    BASE_DIR / 'frontend' / 'dist',  # Frontend build directory for static files
 ]
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # Local storage for static files
