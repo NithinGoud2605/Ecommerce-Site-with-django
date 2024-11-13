@@ -45,6 +45,8 @@ function ProductScreen() {
   const submitHandler = async (e) => {
     e.preventDefault();
     setLoadingReview(true);
+    console.log("User Info:", userInfo); // Log user information
+
     try {
       const config = {
         headers: {
@@ -52,13 +54,17 @@ function ProductScreen() {
           Authorization: `Bearer ${userInfo.token}`,
         },
       };
-      await axiosInstance.post(`/api/products/${productId}/reviews/`, { rating, comment }, config);
+
+      const response = await axiosInstance.post(`/api/products/${productId}/reviews/`, { rating, comment }, config);
+      console.log("Review Submission Response:", response); // Log successful response
+
       setSuccessReview(true);
       setRating(0);
       setComment('');
       setLoadingReview(false);
     } catch (err) {
       setErrorReview(err.response?.data?.detail || 'Error submitting review');
+      console.error("Detailed Error Response:", err.response); // Log detailed error response
       setLoadingReview(false);
     }
   };
