@@ -4,7 +4,7 @@ from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger  # Import for pagination
 from django.db.models import Q  
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from base.models import Product
+from base.models import Product,Review
 from base.serializers import ProductSerializer
 import logging
 
@@ -120,39 +120,38 @@ def uploadImage(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def createProductReview(request, pk):
-    user = request.user
-    product = Product.objects.get(_id=pk)
-    data = request.data
+    try:
+        user = request.user
+        product = Product.objects.get(_id=pk)
+        data = request.data
 
-    # 1 - Review already exists
-    alreadyExists = product.review_set.filter(user=user).exists()
-    if alreadyExists:
-        content = {'detail': 'Product already reviewed'}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+        # 1 - Check if Review Already Exists
+        alreadyExists = product.review_set.filter(user=user).exists()
+        if alreadyExists:
+            return Response({'detail': 'Product already reviewed'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # 2 - No Rating or 0
-    elif data['rating'] == 0:
-        content = {'detail': 'Please select a rating'}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+        # 2 - Validate Rating
+        if 'rating' not in data or data['rating'] == 0:
+            return Response({'detail': 'Please select a rating'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # 3 - Create review
-    else:
+        # 3 - Create Review
         review = Review.objects.create(
             user=user,
             product=product,
             name=user.first_name,
             rating=data['rating'],
-            comment=data['comment'],
+            comment=data.get('comment', ''),
         )
 
+        # Update Product Reviews Count and Rating
         reviews = product.review_set.all()
-        product.numReviews = len(reviews)
-
-        total = 0
-        for i in reviews:
-            total += i.rating
-
-        product.rating = total / len(reviews)
+        product.numReviews = reviews.count()
+        product.rating = sum([rev.rating for rev in reviews]) / reviews.count()
         product.save()
 
-        return Response('Review Added')
+        return Response({'detail': 'Review added successfully'}, status=status.HTTP_201_CREATED)
+    except Product.DoesNotExist:
+        return Response({'detail': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        logger.error(f"Error creating review for product with ID {pk}: {e}")
+        return Response({'detail': 'Error creating review'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
