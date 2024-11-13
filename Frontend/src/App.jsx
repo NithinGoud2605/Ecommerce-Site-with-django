@@ -14,14 +14,19 @@ import PaymentScreen from './Screens/PaymentScreen';
 import PlaceOrderScreen from './Screens/PlaceOrderScreen';
 import OrderScreen from './Screens/OrderScreen';
 import UserListScreen from './Screens/UserListScreen';
-import UserEditScreen from './Screens/UserEditScreen'; // Add this import
+import UserEditScreen from './Screens/UserEditScreen';
 import ProductListScreen from './Screens/ProductListScreen';
 import ProductEditScreen from './Screens/ProductEditScreen';
 import OrderListScreen from './Screens/OrderListScreen';
 
 function App() {
   return (
-    <Router>
+    <Router
+      unstable_future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <Header />
 
       <main className="py-3">

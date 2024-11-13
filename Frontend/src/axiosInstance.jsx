@@ -6,7 +6,7 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(config => {
-  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  const userInfo = localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')) : null;
 
   // Only add Authorization and CSRF headers if the endpoint requires authentication
   if (!config.url.includes('/api/users/register/') && !config.url.includes('/api/token/')) {
@@ -24,5 +24,15 @@ axiosInstance.interceptors.request.use(config => {
 }, error => {
   return Promise.reject(error);
 });
+
+axiosInstance.interceptors.response.use(
+  response => response,
+  error => {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Detailed Error Response:', error.response);
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default axiosInstance;
