@@ -26,7 +26,18 @@ This project is a full-featured eCommerce application built using Django for the
 - **Secure Authentication**: User authentication using JWT for secure access to the API.
 
 ## Project Structure
-Ecommerce-Site-with-Django/ ├── backend/ # Django backend with API logic and data models │ ├── settings.py # Configuration settings for Django │ └── urls.py # URL routing for backend APIs ├── frontend/ # React frontend with shopping cart and UI components │ ├── src/ # Source code for React app │ └── public/ # Public assets and index.html ├── staticfiles/ # Static files managed by Django and whitenoise ├── requirements.txt # Backend dependencies └── README.md # Project description and usage
+```plaintext
+Ecommerce-Site-with-Django/
+├── backend/
+│   ├── settings.py
+│   ├── urls.py
+├── frontend/
+│   ├── src/
+│   └── public/
+├── staticfiles/
+├── requirements.txt
+└── README.md
+
 
 
 ## Technologies Used
@@ -34,7 +45,7 @@ Ecommerce-Site-with-Django/ ├── backend/ # Django backend with API logic a
 - **Backend**: Django, Django REST Framework, PostgreSQL, AWS S3
 - **Frontend**: React, Redux
 - **Authentication**: JWT for secure user authentication
-- **Deployment**: Heroku (backend), Netlify or Vercel (frontend)
+- **Deployment**: Heroku 
 - **Payment**: PayPal API integration
 
 ## Installation
@@ -42,7 +53,6 @@ Ecommerce-Site-with-Django/ ├── backend/ # Django backend with API logic a
 ### Prerequisites
 
 - [Python 3.x](https://www.python.org/downloads/)
-- [Node.js and npm](https://nodejs.org/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
 
@@ -52,3 +62,5 @@ Ecommerce-Site-with-Django/ ├── backend/ # Django backend with API logic a
    ```bash
    git clone https://github.com/yourusername/ecommerce-site-with-django.git
    cd ecommerce-site-with-django/backend
+2. Install dependencies:
+   pip install -r requirements.txt
