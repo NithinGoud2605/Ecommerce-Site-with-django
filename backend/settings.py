@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-lj689gx2e0*1wpxms9&!7#v=2-fsy^7(!3mgnzo68fe8ox0d(u'
 DEBUG = False  # Set to True for local development if needed
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'handmadehub-4c471829f515.herokuapp.com','handmadehub.onrender.com']  # Add production domain here
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','handmadehub.onrender.com']  # Add production domain here
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -154,7 +154,10 @@ STORAGES = {
 }
 
 # CORS settings for API access
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://handmadehub.onrender.com",
+]
+
 
 # JWT Authentication settings
 SIMPLE_JWT = {
