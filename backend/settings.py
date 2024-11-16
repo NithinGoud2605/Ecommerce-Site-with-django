@@ -154,9 +154,7 @@ STORAGES = {
 }
 
 # CORS settings for API access
-CORS_ALLOWED_ORIGINS = [
-    "https://handmadehub.onrender.com",
-]
+CORS_ALLOWED_ORIGINS = True
 
 
 # JWT Authentication settings
