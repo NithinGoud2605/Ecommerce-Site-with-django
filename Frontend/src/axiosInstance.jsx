@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getCsrfToken } from './utils/csrfToken';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://handmadehub-4c471829f515.herokuapp.com',  // Production URL
+  baseURL: 'https://handmadehub.onrender.com/',  // Production URL
 });
 
 axiosInstance.interceptors.request.use(config => {
