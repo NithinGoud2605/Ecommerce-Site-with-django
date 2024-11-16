@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getCsrfToken } from './utils/csrfToken';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://handmadehub.onrender.com/api',  // Backend URL
+  baseURL: 'https://handmadehub.onrender.com',  // Backend URL
 });
 
 axiosInstance.interceptors.request.use(config => {
