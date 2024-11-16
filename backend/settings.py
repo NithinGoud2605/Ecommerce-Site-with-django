@@ -120,7 +120,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'Frontend' / 'dist' 
 ]
 
-
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Media files settings
 MEDIA_URL = '/images/'
 MEDIA_ROOT = None  # No local storage for media files as we’re using S3
