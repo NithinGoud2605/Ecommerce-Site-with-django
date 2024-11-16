@@ -2,22 +2,19 @@ import axios from 'axios';
 import { getCsrfToken } from './utils/csrfToken';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://handmadehub.onrender.com/',  // Production URL
+  baseURL: 'https://handmadehub.onrender.com/api',  // Backend URL
 });
 
 axiosInstance.interceptors.request.use(config => {
   const userInfo = localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')) : null;
 
-  // Only add Authorization and CSRF headers if the endpoint requires authentication
-  if (!config.url.includes('/api/users/register/') && !config.url.includes('/api/token/')) {
-    if (userInfo && userInfo.token) {
-      config.headers['Authorization'] = `Bearer ${userInfo.token}`;
-    }
+  if (userInfo && userInfo.token) {
+    config.headers['Authorization'] = `Bearer ${userInfo.token}`;
+  }
 
-    const csrfToken = getCsrfToken();
-    if (csrfToken) {
-      config.headers['X-CSRFToken'] = csrfToken;
-    }
+  const csrfToken = getCsrfToken();
+  if (csrfToken) {
+    config.headers['X-CSRFToken'] = csrfToken;
   }
 
   return config;
