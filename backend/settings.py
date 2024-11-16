@@ -154,9 +154,9 @@ STORAGES = {
 }
 
 # CORS settings for API access
-CORS_ALLOWED_ORIGINS = True
-
-
+CORS_ALLOWED_ORIGINS = [
+    "https://handmadehub.onrender.com",
+]
 # JWT Authentication settings
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
