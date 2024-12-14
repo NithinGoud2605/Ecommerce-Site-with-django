@@ -3,7 +3,7 @@
 
 Welcome to the **E-Commerce Platform**, a comprehensive e-commerce application built with Django and React. This platform offers a seamless shopping experience for users and robust management tools for administrators.
 
-[🔗 Live Demo](https://handmadehub-4c471829f515.herokuapp.com/#/)
+[🔗 Live Demo](https://handmadehub.onrender.com/)
 
 ## 📋 Table of Contents
 
