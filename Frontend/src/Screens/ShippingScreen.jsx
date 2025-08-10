@@ -3,6 +3,7 @@ import { Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import FormContainer from '../components/FormContainer';
 import CheckoutSteps from '../components/CheckoutSteps';
+import { setMeta } from '../lib/seo.js';
 
 function ShippingScreen() {
     const navigate = useNavigate();
@@ -18,6 +19,10 @@ function ShippingScreen() {
         setCity(savedAddress.city || '');
         setPostalCode(savedAddress.postalCode || '');
         setCountry(savedAddress.country || '');
+    }, []);
+
+    useEffect(() => {
+        setMeta({ title: 'Shipping – Handmade Hub', description: 'Enter your shipping information.' });
     }, []);
 
     const submitHandler = (e) => {

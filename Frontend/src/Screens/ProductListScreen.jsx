@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance'; // Updated to use axios instance
 import Loader from '../components/Loader';
 import Message from '../components/Message';
+import { setMeta } from '../lib/seo.js';
 
 function ProductListScreen() {
   const [products, setProducts] = useState([]);
@@ -28,6 +29,10 @@ function ProductListScreen() {
       setHasFetched(true);
     }
   }, [navigate, userInfo, hasFetched, page]);
+
+  useEffect(() => {
+    setMeta({ title: 'Products – Admin – Handmade Hub', description: 'Admin: manage products.' });
+  }, []);
 
   const fetchProducts = async (page = 1) => {
     try {

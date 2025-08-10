@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance'; // Replace with your axios instance import
 import Loader from '../components/Loader';
 import Message from '../components/Message';
+import { setMeta } from '../lib/seo.js';
 
 function OrderListScreen() {
   const [orders, setOrders] = useState([]);
@@ -41,6 +42,10 @@ function OrderListScreen() {
       fetchOrders();
     }
   }, [navigate, userInfo, hasFetched]);
+
+  useEffect(() => {
+    setMeta({ title: 'Orders – Admin – Handmade Hub', description: 'Admin: manage orders.' });
+  }, []);
 
   return (
     <div>

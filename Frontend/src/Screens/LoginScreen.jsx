@@ -1,52 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Form, Button, Row, Col } from 'react-bootstrap';
-import axiosInstance from '../axiosInstance'; // Import your configured axios instance
+import { Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import FormContainer from '../components/FormContainer';
 import Loader from '../Components/Loader';
-import Message from '../Components/Message';
+import { useAuth } from '../hooks/useAuth';
+import { setMeta } from '../lib/seo.js';
 
 function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { user, loading, error, signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const redirect = location.search ? location.search.split('=')[1] : '/';
 
   useEffect(() => {
-    const userInfo = localStorage.getItem('userInfo');
-    if (userInfo) {
-      navigate(redirect);
-    }
-  }, [navigate, redirect]);
+    if (user) navigate(redirect);
+  }, [user, navigate, redirect]);
+
+  useEffect(() => {
+    setMeta({ title: 'Sign In – Handmade Hub', description: 'Access your Handmade Hub account.' });
+  }, []);
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data } = await axiosInstance.post('/api/users/login/', {
-        username: email, // Changed `email` to `username`
-        password,
-      });
-
-      localStorage.setItem('userInfo', JSON.stringify(data));
-      setLoading(false);
-      navigate(redirect);
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to login');
-      setLoading(false);
-    }
+    await signIn(email, password);
   };
 
   return (
     <FormContainer>
       <h1>Sign In</h1>
-      {error && <Message variant="danger">{error}</Message>}
+      {error && <Alert variant="danger">{error}</Alert>}
       {loading && <Loader />}
       <Form onSubmit={submitHandler} className="mt-3">
         <Form.Group controlId="email" className="mb-3">

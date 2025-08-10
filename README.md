@@ -113,10 +113,19 @@ Welcome to the **E-Commerce Platform**, a comprehensive e-commerce application b
    npm install
    ```
 
-3. **Start the React development server**:
+3. **Environment variables**: Create `Frontend/.env.local` with:
+
+```
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_CATALOG_SUPABASE_READS=false
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
+4. **Start the React development server**:
 
    ```bash
-   npm start
+   npm run dev
    ```
 
 ---

@@ -4,10 +4,12 @@ main {
 }
 
 /* Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap');
+
 body {
-  background-color: #f1f1f1; /* Light neutral background */
-  color: #5d4037; /* Dark brown text */
-  font-family: 'Roboto', sans-serif;
+  background-color: #FCFBF9; /* brand-bg */
+  color: #222222; /* brand-ink */
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif;
   margin: 0;
   padding: 0;
   line-height: 1.6; /* Improved readability */
@@ -15,20 +17,21 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #6d4c41; /* Warm brown for a softer look */
+  color: #222222; /* brand-ink */
   margin-top: 0;
   margin-bottom: 0.5em;
   font-weight: 600;
+  font-family: 'Playfair Display', serif;
 }
 
 a {
-  color: #d84315; /* Deep orange for links */
+  color: #C8A96A; /* brand-accent */
   text-decoration: none;
   transition: color 0.3s;
 }
 
 a:hover {
-  color: #bf360c; /* Darker orange on hover */
+  color: #9f854f; /* darker accent */
 }
 
 ::-webkit-scrollbar {
@@ -65,14 +68,17 @@ select:focus {
 
 /* Button Styles */
 .btn-primary {
-  background-color: #d84315;
-  border-color: #d84315;
+  background-color: #C8A96A;
+  border-color: #C8A96A;
 }
 
 .btn-primary:hover {
-  background-color: #bf360c;
-  border-color: #bf360c;
+  background-color: #a88d55;
+  border-color: #a88d55;
 }
+
+/* Focus visible enhancements for accessibility */
+:focus-visible { outline: 2px solid #C8A96A; outline-offset: 2px; }
 
 .btn-light {
   background-color: #f5f5f5;
@@ -308,6 +314,26 @@ select:focus {
     font-size: 1rem;
   }
 }
+
+/* Prefer reduced motion guard (WCAG/MDN) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Aspect ratio helpers */
+.ar-4-5 { position: relative; padding-top: 125%; }
+.ar-16-9 { position: relative; padding-top: 56.25%; }
+.ar-1-1 { position: relative; padding-top: 100%; }
+.ar-contents { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* Editorial copy */
+.prose-fashion { font-family: 'Space Grotesk', Inter, system-ui, sans-serif; line-height: 1.7; color: #222222; }
+.prose-fashion h1,.prose-fashion h2 { font-family: 'Playfair Display', serif; letter-spacing: -0.02em; }
 
 
 

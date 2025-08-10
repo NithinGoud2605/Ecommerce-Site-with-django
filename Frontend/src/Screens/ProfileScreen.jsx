@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Row, Col, Table } from 'react-bootstrap';
-import axiosInstance from '../axiosInstance'; // Use axiosInstance for consistent configuration
+import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../hooks/useAuth';
 import Loader from '../Components/Loader';
 import Message from '../Components/Message';
+import { setMeta } from '../lib/seo.js';
 
 function ProfileScreen() {
   const [name, setName] = useState('');
@@ -20,32 +22,29 @@ function ProfileScreen() {
   const [errorOrders, setErrorOrders] = useState(null);
 
   const navigate = useNavigate();
-  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      if (!userInfo) {
+      if (!user) {
         navigate('/login');
         return;
       }
 
       try {
         setLoading(true);
-        const config = {
-          headers: {
-            'Content-type': 'application/json',
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        };
-        const { data } = await axiosInstance.get(`/api/users/profile/`, config);
-        setName(data.name);
-        setEmail(data.email);
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('full_name, email')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (error) throw error;
+        setName(data?.full_name || '');
+        setEmail(data?.email || user.email || '');
         setLoading(false);
       } catch (error) {
         setError(
-          error.response && error.response.data.detail
-            ? error.response.data.detail
-            : error.message
+          error?.message || 'Failed to load profile'
         );
         setLoading(false);
       }
@@ -54,29 +53,30 @@ function ProfileScreen() {
     const fetchOrders = async () => {
       try {
         setLoadingOrders(true);
-        const config = {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        };
-        const { data } = await axiosInstance.get('/api/orders/myorders/', config);
-        setOrders(data);
+        const { data, error } = await supabase
+          .from('orders')
+          .select('id, created_at, subtotal_cents, is_paid, paid_at')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        setOrders(data || []);
         setLoadingOrders(false);
       } catch (error) {
         setErrorOrders(
-          error.response && error.response.data.detail
-            ? error.response.data.detail
-            : error.message
+          error?.message || 'Failed to load orders'
         );
         setLoadingOrders(false);
       }
     };
 
-    if (userInfo) {
+    if (user && !authLoading) {
       fetchUserDetails();
       fetchOrders();
     }
-  }, [navigate]);
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    setMeta({ title: 'Profile – Handmade Hub', description: 'Manage your profile and orders.' });
+  }, []);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -86,25 +86,16 @@ function ProfileScreen() {
       setMessage('');
       try {
         setLoading(true);
-        const config = {
-          headers: {
-            'Content-type': 'application/json',
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        };
-        const { data } = await axiosInstance.put(
-          `/api/users/profile/update/`,
-          { id: userInfo._id, name, email, password },
-          config
-        );
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({ id: user.id, full_name: name, email })
+          .eq('id', user.id);
+        if (error) throw error;
         setSuccess(true);
-        localStorage.setItem('userInfo', JSON.stringify(data));
         setLoading(false);
       } catch (error) {
         setError(
-          error.response && error.response.data.detail
-            ? error.response.data.detail
-            : error.message
+          error?.message || 'Failed to update profile'
         );
         setLoading(false);
       }
@@ -189,18 +180,18 @@ function ProfileScreen() {
             <tbody>
               {orders.map((order) => (
                 <tr key={order._id}>
-                  <td>{order._id}</td>
-                  <td>{order.createdAt.substring(0, 10)}</td>
-                  <td>${order.totalPrice}</td>
+                  <td>{order.id}</td>
+                  <td>{String(order.created_at).substring(0, 10)}</td>
+                  <td>${(order.subtotal_cents / 100).toFixed(2)}</td>
                   <td>
-                    {order.isPaid ? (
-                      order.paidAt.substring(0, 10)
+                    {order.is_paid ? (
+                      String(order.paid_at).substring(0, 10)
                     ) : (
                       <i className="fas fa-times" style={{ color: 'red' }}></i>
                     )}
                   </td>
                   <td>
-                    <Link to={`/order/${order._id}`} className="btn btn-sm btn-light">
+                    <Link to={`/order/${order.id}`} className="btn btn-sm btn-light">
                       Details
                     </Link>
                   </td>

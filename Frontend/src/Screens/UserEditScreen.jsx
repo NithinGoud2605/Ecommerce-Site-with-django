@@ -5,6 +5,7 @@ import axiosInstance from '../axiosInstance'; // Ensure you import the configure
 import Loader from '../Components/Loader';
 import Message from '../Components/Message';
 import FormContainer from '../components/FormContainer';
+import { setMeta } from '../lib/seo.js';
 
 function UserEditScreen() {
   const { id: userId } = useParams();
@@ -55,6 +56,10 @@ function UserEditScreen() {
       fetchUserDetails();
     }
   }, [userId, userInfo, navigate, hasFetched]);
+
+  useEffect(() => {
+    setMeta({ title: 'Edit User – Admin – Handmade Hub', description: 'Admin: edit user.' });
+  }, []);
 
   const submitHandler = async (e) => {
     e.preventDefault();

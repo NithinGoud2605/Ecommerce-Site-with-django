@@ -6,7 +6,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-lj689gx2e0*1wpxms9&!7#v=2-fsy^7(!3mgnzo68fe8ox0d(u'
-DEBUG = False  # Set to True for local development if needed
+DEBUG = os.environ.get('DJANGO_DEBUG', '0') == '1'
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost','handmadehub.onrender.com']  # Add production domain here
 
 INSTALLED_APPS = [
@@ -91,11 +91,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"postgres://NithinGoud:{os.environ.get('DB_PASS')}@handmadehub-identifier.c78sq0okmp1j.us-east-2.rds.amazonaws.com:5432/HandmadeHUB"
-    )
-}
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=f"postgres://NithinGoud:{os.environ.get('DB_PASS')}@handmadehub-identifier.c78sq0okmp1j.us-east-2.rds.amazonaws.com:5432/HandmadeHUB"
+        )
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -156,6 +164,15 @@ STORAGES = {
 # CORS settings for API access
 CORS_ALLOWED_ORIGINS = [
     "https://handmadehub.onrender.com",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+# CSRF trusted origins (use scheme + host)
+CSRF_TRUSTED_ORIGINS = [
+    "https://handmadehub.onrender.com",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 # JWT Authentication settings
 SIMPLE_JWT = {
@@ -182,3 +199,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = 'DENY'
+
+# Local dev overrides for security when DEBUG is on
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False

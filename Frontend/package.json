@@ -14,8 +14,12 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
     "@supabase/supabase-js": "^2.45.4",
+    "@tailwindcss/postcss": "^4.1.11",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "framer-motion": "^11.18.2",
+    "lucide-react": "^0.474.0",
+    "pinch-zoom-js": "^2.3.5",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.5",
@@ -35,13 +39,17 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9.13.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
-    "globals": "^15.11.0"
+    "globals": "^15.11.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "vite": "^5.4.8"
   },
   "engines": {
-  "node": "18.x"
-}
+    "node": "18.x"
+  }
 }

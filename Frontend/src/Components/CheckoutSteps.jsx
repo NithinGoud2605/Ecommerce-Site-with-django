@@ -1,52 +1,30 @@
-import React from 'react'
-import { Nav } from 'react-bootstrap'
-import { LinkContainer } from 'react-router-bootstrap'
+import React, { useMemo } from 'react';
 
-function CheckoutSteps({ step1, step2, step3, step4 }) {
-
-    return (
-        <Nav className='justify-content-center mb-4'>
-            <Nav.Item>
-                {step1 ? (
-                    <LinkContainer to='/login'>
-                        <Nav.Link>Login</Nav.Link>
-                    </LinkContainer>
-                ) : (
-                        <Nav.Link disabled>Login</Nav.Link>
-                    )}
-            </Nav.Item>
-
-            <Nav.Item>
-                {step2 ? (
-                    <LinkContainer to='/shipping'>
-                        <Nav.Link>Shipping</Nav.Link>
-                    </LinkContainer>
-                ) : (
-                        <Nav.Link disabled>Shipping</Nav.Link>
-                    )}
-            </Nav.Item>
-
-            <Nav.Item>
-                {step3 ? (
-                    <LinkContainer to='/payment'>
-                        <Nav.Link>Payment</Nav.Link>
-                    </LinkContainer>
-                ) : (
-                        <Nav.Link disabled>Payment</Nav.Link>
-                    )}
-            </Nav.Item>
-
-            <Nav.Item>
-                {step4 ? (
-                    <LinkContainer to='/placeorder'>
-                        <Nav.Link>Place Order</Nav.Link>
-                    </LinkContainer>
-                ) : (
-                        <Nav.Link disabled>Place Order</Nav.Link>
-                    )}
-            </Nav.Item>
-        </Nav>
-    )
+export default function CheckoutSteps({ current = 0 }) {
+  const steps = [
+    { id: 0, label: 'Contact' },
+    { id: 1, label: 'Shipping' },
+    { id: 2, label: 'Review' },
+  ];
+  const reduceMotion = useMemo(() => (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches), []);
+  return (
+    <div className="d-flex align-items-center justify-content-center gap-3 mb-4" aria-label="Checkout steps">
+      {steps.map((s, i) => (
+        <div key={s.id} className="d-flex align-items-center">
+          <div
+            className="rounded-circle d-inline-flex align-items-center justify-content-center"
+            aria-current={current === s.id}
+            aria-label={`${s.label} step ${s.id + 1} of ${steps.length}`}
+            style={{ width: 32, height: 32, background: current >= s.id ? '#0d6efd' : '#e9ecef', color: current >= s.id ? 'white' : '#6c757d', transition: reduceMotion ? 'none' : 'background-color 160ms ease' }}
+          >
+            {s.id + 1}
+          </div>
+          <div className="ms-2 me-2 fw-semibold" style={{ minWidth: 80, textAlign: 'left' }}>{s.label}</div>
+          {i < steps.length - 1 && (
+            <div className="flex-shrink-0" style={{ width: 48, height: 2, background: current > s.id ? '#0d6efd' : '#e9ecef', transition: reduceMotion ? 'none' : 'background-color 160ms ease' }} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }
-
-export default CheckoutSteps

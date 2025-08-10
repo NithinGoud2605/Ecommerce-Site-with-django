@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance'; // Import your configured axios instance
 import Loader from '../Components/Loader';
 import Message from '../Components/Message';
+import { setMeta } from '../lib/seo.js';
 
 function UserListScreen() {
   const [users, setUsers] = useState([]);
@@ -41,6 +42,10 @@ function UserListScreen() {
       fetchUsers();
     }
   }, [navigate, userInfo, hasFetched]);
+
+  useEffect(() => {
+    setMeta({ title: 'Users – Admin – Handmade Hub', description: 'Admin: manage users.' });
+  }, []);
 
   const deleteUserHandler = async (id) => {
     if (window.confirm('Are you sure you want to delete this user?')) {

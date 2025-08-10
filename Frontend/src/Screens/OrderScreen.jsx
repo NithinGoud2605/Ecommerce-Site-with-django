@@ -5,6 +5,7 @@ import axiosInstance from '../axiosInstance'; // Replace axios with your instanc
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import { PayPalButton } from 'react-paypal-button-v2';
+import { setMeta } from '../lib/seo.js';
 
 function OrderScreen() {
     const { id: orderId } = useParams();
@@ -59,6 +60,10 @@ function OrderScreen() {
             addPayPalScript();
         }
     }, [order, orderId, userInfo, navigate, sdkReady]);
+
+    useEffect(() => {
+        setMeta({ title: `Order ${orderId} – Handmade Hub`, description: 'View your order details.' });
+    }, [orderId]);
 
     const successPaymentHandler = async (paymentResult) => {
         try {

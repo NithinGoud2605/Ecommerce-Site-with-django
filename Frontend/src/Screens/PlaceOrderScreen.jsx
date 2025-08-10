@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosInstance'; // Use axiosInstance for consistent handling
 import Message from '../Components/Message';
 import CheckoutSteps from '../components/CheckoutSteps';
+import { setMeta } from '../lib/seo.js';
 
 function PlaceOrderScreen() {
   const [cart, setCart] = useState({
@@ -39,6 +40,10 @@ function PlaceOrderScreen() {
       taxPrice,
       totalPrice,
     });
+  }, []);
+
+  useEffect(() => {
+    setMeta({ title: 'Review Order – Handmade Hub', description: 'Review and place your order.' });
   }, []);
 
   const placeOrder = async () => {

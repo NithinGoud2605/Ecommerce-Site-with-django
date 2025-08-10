@@ -23,14 +23,18 @@ function Testimonials() {
 
   const renderStars = (rating) => {
     const fullStars = Math.floor(rating);
-    const halfStar = rating % 1 !== 0;
-    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    const hasHalfStar = rating % 1 !== 0;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
     return (
       <>
-        {Array(fullStars).fill(<FaStar className="star-icon" />)}
-        {halfStar && <FaStarHalfAlt className="star-icon" />}
-        {Array(emptyStars).fill(<FaRegStar className="star-icon" />)}
+        {Array.from({ length: fullStars }).map((_, i) => (
+          <FaStar key={`full-${i}`} className="star-icon" />
+        ))}
+        {hasHalfStar && <FaStarHalfAlt key="half" className="star-icon" />}
+        {Array.from({ length: emptyStars }).map((_, i) => (
+          <FaRegStar key={`empty-${i}`} className="star-icon" />
+        ))}
       </>
     );
   };

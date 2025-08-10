@@ -1,28 +1,27 @@
-import React from 'react'
-import { Pagination } from 'react-bootstrap'
-import { LinkContainer } from 'react-router-bootstrap'
+import React, { useEffect, useRef } from 'react';
 
-function Paginate({ pages, page, keyword = '', isAdmin = false }) {
-    if (keyword) {
-        keyword = keyword.split('?keyword=')[1].split('&')[0]
-    }
+// Load More button with optional infinite scroll sentinel
+export default function Paginate({ hasMore, onLoadMore, infinite = false }) {
+  const sentinelRef = useRef(null);
+  useEffect(() => {
+    if (!infinite || !sentinelRef.current) return;
+    const el = sentinelRef.current;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) onLoadMore?.();
+      });
+    }, { rootMargin: '200px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [infinite, onLoadMore]);
 
-    return (pages > 1 && (
-        <Pagination>
-            {[...Array(pages).keys()].map((x) => (
-                <LinkContainer
-                    key={x + 1}
-                    to={!isAdmin ?
-                        `/?keyword=${keyword}&page=${x + 1}`
-                        : `/admin/productlist/?keyword=${keyword}&page=${x + 1}`
-                    }
-                >
-                    <Pagination.Item active={x + 1 === page}>{x + 1}</Pagination.Item>
-                </LinkContainer>
-            ))}
-        </Pagination>
-    )
-    )
+  if (!hasMore) return null;
+  return (
+    <div className='text-center my-3'>
+      {!infinite && (
+        <button type='button' className='btn btn-outline-secondary' onClick={() => onLoadMore?.()}>Load more</button>
+      )}
+      {infinite && <div ref={sentinelRef} aria-hidden='true' />}
+    </div>
+  );
 }
-
-export default Paginate

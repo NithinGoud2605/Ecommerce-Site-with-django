@@ -4,6 +4,7 @@ import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import axiosInstance from '../axiosInstance'; // Ensure axiosInstance is configured
 import Loader from '../Components/Loader';
 import Message from '../Components/Message';
+import { setMeta } from '../lib/seo.js';
 
 function ProductEditScreen() {
     const { id: productId } = useParams();
@@ -51,6 +52,10 @@ function ProductEditScreen() {
 
         fetchProductDetails();
     }, [navigate, productId, userInfo, productLoaded]);
+
+    useEffect(() => {
+        setMeta({ title: 'Edit Product – Admin – Handmade Hub', description: 'Admin: edit product.' });
+    }, []);
 
     const submitHandler = async (e) => {
         e.preventDefault();

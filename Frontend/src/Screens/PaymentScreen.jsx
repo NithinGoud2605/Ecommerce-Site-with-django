@@ -3,6 +3,7 @@ import { Form, Button, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import FormContainer from '../components/FormContainer';
 import CheckoutSteps from '../components/CheckoutSteps';
+import { setMeta } from '../lib/seo.js';
 
 function PaymentScreen() {
   const [paymentMethod, setPaymentMethod] = useState('PayPal');
@@ -14,6 +15,10 @@ function PaymentScreen() {
       navigate('/shipping');
     }
   }, [navigate, shippingAddress]);
+
+  useEffect(() => {
+    setMeta({ title: 'Payment – Handmade Hub', description: 'Select your payment method.' });
+  }, []);
 
   const submitHandler = (e) => {
     e.preventDefault();

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Form, Button, Row, Col } from 'react-bootstrap';
-import axiosInstance from '../axiosInstance'; // Use the configured axios instance
 import FormContainer from '../components/FormContainer';
 import Loader from '../Components/Loader';
 import Message from '../Components/Message';
+import { useAuth } from '../hooks/useAuth';
+import { setMeta } from '../lib/seo.js';
 
 function RegisterScreen() {
     const [name, setName] = useState('');
@@ -12,18 +13,20 @@ function RegisterScreen() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [message, setMessage] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const { user, loading, error, signUp } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const redirect = location.search ? location.search.split('=')[1] : '/';
 
     useEffect(() => {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        if (userInfo) {
+        if (user) {
             navigate(redirect);
         }
-    }, [navigate, redirect]);
+    }, [user, navigate, redirect]);
+
+    useEffect(() => {
+        setMeta({ title: 'Sign Up – Handmade Hub', description: 'Create your Handmade Hub account.' });
+    }, []);
 
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -32,26 +35,7 @@ function RegisterScreen() {
             return;
         }
 
-        try {
-            setLoading(true);
-            setError(null);
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            };
-            const { data } = await axiosInstance.post(
-                '/api/users/register/',
-                { name, email, password },
-                config
-            );
-            localStorage.setItem('userInfo', JSON.stringify(data));
-            setLoading(false);
-            navigate(redirect);
-        } catch (err) {
-            setLoading(false);
-            setError(err.response?.data?.detail || 'Registration failed');
-        }
+        await signUp(email, password);
     };
 
     return (
