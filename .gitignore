@@ -87,4 +87,18 @@ yarn-error.log*
 pnpm-debug.log*
 .eslintcache
 
+# Frontend build output (do not commit build artifacts)
+Frontend/dist/
+
+# Stray Vite build artifacts at repo root (keep Frontend sources)
+/assets/
+/index*.html
+/index-*.js*
+/index.*.css*
+/logo*.png
+/bgimage*.png
+/emoji*.png
+/vite*.svg*
+/rest_framework/
+
 myenv/
