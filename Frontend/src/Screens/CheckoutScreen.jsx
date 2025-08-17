@@ -27,7 +27,7 @@ export default function CheckoutScreen() {
   }, []);
 
   useEffect(() => {
-    setMeta({ title: 'Checkout – Handmade Hub', description: 'Complete your order securely.' });
+    setMeta({ title: 'Checkout – Vyshnavi Pelimelli', description: 'Complete your order securely.' });
   }, []);
 
   const contactValid = useMemo(() => {

@@ -21,7 +21,7 @@ function Footer() {
       <Container>
         <Row className="py-4 align-items-center">
           <Col md={5} className="mb-3 mb-md-0">
-            <h5 className="footer-brand">Handmade HUB</h5>
+            <h5 className="footer-brand">Vyshnavi Pelimelli</h5>
             <div className="text-muted" style={{ fontSize: '0.9rem' }}>Join our newsletter. We respect your privacy.</div>
           </Col>
           <Col md={4} className="mb-3 mb-md-0">
@@ -46,7 +46,7 @@ function Footer() {
           </Col>
         </Row>
         <Row className="py-3 border-top border-secondary" style={{ fontSize: '0.9rem' }}>
-          <Col md={6} className="mb-2">© {new Date().getFullYear()} Handmade Hub</Col>
+          <Col md={6} className="mb-2">© {new Date().getFullYear()} Vyshnavi Pelimelli</Col>
           <Col md={6} className="d-flex gap-3 justify-content-md-end">
             <a href="#" className="text-decoration-none" style={{ color: '#eee' }}>Press</a>
             <a href="#" className="text-decoration-none" style={{ color: '#eee' }}>Stockists</a>

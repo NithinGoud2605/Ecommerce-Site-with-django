@@ -1,20 +1,21 @@
 import axios from 'axios';
 import { getCsrfToken } from './utils/csrfToken';
 
-// Prefer env override, fallback to existing production URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://handmadehub.onrender.com';
+// Prefer env override; otherwise use current origin to avoid CORS in dev
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '');
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
 });
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const userInfo = localStorage.getItem('userInfo')
-      ? JSON.parse(localStorage.getItem('userInfo'))
-      : null;
+    let userInfo = null;
+    try { userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null'); } catch {}
 
-    if (userInfo && userInfo.token) {
+    // Only attach Authorization for our JWT-based backend tokens, not Supabase sessions
+    if (userInfo && userInfo.token && userInfo.provider !== 'supabase') {
       config.headers['Authorization'] = `Bearer ${userInfo.token}`;
     }
 

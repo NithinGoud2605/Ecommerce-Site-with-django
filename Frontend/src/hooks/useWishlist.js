@@ -1,42 +1,53 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './useAuth';
+
+function loadWishlist(userId) {
+  try { return JSON.parse(localStorage.getItem(`wishlist:${userId}`) || '[]'); } catch { return []; }
+}
+
+function saveWishlist(userId, items) {
+  try { localStorage.setItem(`wishlist:${userId}`, JSON.stringify(items)); } catch {}
+}
 
 export function useWishlist() {
   const { user } = useAuth();
+  const userId = user?.id || null;
   const [items, setItems] = useState([]);
   const [ids, setIds] = useState(new Set());
 
   const refresh = useCallback(async () => {
-    if (!user) { setItems([]); setIds(new Set()); return; }
-    const { data, error } = await supabase.from('wishlists').select('product_id, variant_id').eq('user_id', user.id);
-    if (error) return;
-    setItems(data || []);
+    if (!userId) { setItems([]); setIds(new Set()); return; }
+    const data = loadWishlist(userId);
+    setItems(data);
     setIds(new Set((data || []).map((d) => `${d.product_id}:${d.variant_id || ''}`)));
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => {
+    const onStorage = (e) => { if (e.key === `wishlist:${userId}`) refresh(); };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [userId, refresh]);
 
   const has = useCallback((productId, variantId) => ids.has(`${productId}:${variantId || ''}`), [ids]);
 
   const add = useCallback(async (productId, variantId=null) => {
-    if (!user) return { error: 'not_authenticated' };
-    await supabase.from('wishlists').insert({ user_id: user.id, product_id: productId, variant_id: variantId });
-    await refresh();
+    if (!userId) return { error: 'not_authenticated' };
+    const next = [...items, { product_id: productId, variant_id: variantId }];
+    setItems(next);
+    setIds(new Set(next.map((d) => `${d.product_id}:${d.variant_id || ''}`)));
+    saveWishlist(userId, next);
     return { ok: true };
-  }, [user, refresh]);
+  }, [userId, items]);
 
   const remove = useCallback(async (productId, variantId=null) => {
-    if (!user) return { error: 'not_authenticated' };
-    await supabase
-      .from('wishlists')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('product_id', productId)
-      .eq('variant_id', variantId);
-    await refresh();
+    if (!userId) return { error: 'not_authenticated' };
+    const next = items.filter((it) => !(it.product_id === productId && (it.variant_id || null) === (variantId || null)));
+    setItems(next);
+    setIds(new Set(next.map((d) => `${d.product_id}:${d.variant_id || ''}`)));
+    saveWishlist(userId, next);
     return { ok: true };
-  }, [user, refresh]);
+  }, [userId, items]);
 
   const toggle = useCallback(async (productId, variantId=null) => {
     const key = `${productId}:${variantId || ''}`;

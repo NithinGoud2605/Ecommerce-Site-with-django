@@ -2,14 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" href="/vp-mark.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Preload local variable font (variable TTF) -->
+    <link rel="preload" as="font" href="/fonts/PlayfairDisplay-VariableFont_wght.ttf" type="font/ttf" crossorigin>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HandmadeHUB</title>
+    <title>Vyshnavi Pelimelli – Atelier</title>
+    <meta name="description" content="Vyshnavi Pelimelli Atelier – designer clothing crafted with architectural tailoring, couture drapery, and responsible materials." />
+    <meta name="theme-color" content="#141416" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Vyshnavi Pelimelli" />
+    <meta property="og:title" content="Vyshnavi Pelimelli – Atelier" />
+    <meta property="og:description" content="Designer clothing by Vyshnavi Pelimelli. Precision construction, fluid forms, and hand-finished details." />
+    <meta property="og:image" content="/logo.png" />
+    <!-- Preload hero image to optimize LCP (desktop) -->
+    <link rel="preload" as="image" href="/bgimage@1600.avif" imagesrcset="/bgimage@1200.avif 1200w, /bgimage@1600.avif 1600w, /bgimage@2000.avif 2000w" imagesizes="100vw">
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

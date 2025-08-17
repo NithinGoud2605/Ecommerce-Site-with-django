@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Vyshnavi Pelimelli mark">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#141416"/>
+      <stop offset="1" stop-color="#2a2a2e"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="36" fill="url(#g)"/>
+  <g fill="#fff">
+    <path d="M48 56h40l40 72 40-72h40l-72 128h-16L48 56z"/>
+    <path d="M160 96h48l-24 40h-48l24-40z" opacity=".85"/>
+  </g>
+</svg>
+

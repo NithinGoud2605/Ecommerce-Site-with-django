@@ -61,3 +61,5 @@ Acceptance
 - Dev caption correctly indicates source; Supabase errors fall back to Django automatically.
 
 
+
+

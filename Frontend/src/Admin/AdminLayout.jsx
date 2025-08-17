@@ -5,13 +5,16 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 export default function AdminLayout() {
   const { pathname } = useLocation();
   const tabs = [
+    { to: '/admin', label: 'Dashboard' },
     { to: '/admin/products', label: 'Products' },
     { to: '/admin/variants', label: 'Variants' },
     { to: '/admin/media', label: 'Media' },
     { to: '/admin/collections', label: 'Collections' },
+    { to: '/admin/orders', label: 'Orders' },
+    { to: '/admin/userlist', label: 'Users' },
     { to: '/admin/pages', label: 'Pages' },
   ];
-  const section = useMemo(() => tabs.find((t) => pathname.startsWith(t.to))?.label || 'Dashboard', [pathname]);
+  const section = useMemo(() => tabs.find((t) => (t.to === '/admin' ? pathname === t.to : pathname.startsWith(t.to)))?.label || 'Dashboard', [pathname, tabs]);
   const [toast, setToast] = useState({ show: false, message: '' });
   const notify = (message) => setToast({ show: true, message });
   const [actions, setActions] = useState(null);
@@ -28,9 +31,12 @@ export default function AdminLayout() {
       <div className='d-flex'>
         <div className='me-4' style={{ minWidth: 200 }}>
           <Nav className='flex-column nav-pills'>
-            {tabs.map((t) => (
-              <Nav.Link key={t.to} as={Link} to={t.to} active={pathname.startsWith(t.to)}>{t.label}</Nav.Link>
-            ))}
+            {tabs.map((t) => {
+              const isActive = t.to === '/admin' ? pathname === t.to : pathname.startsWith(t.to);
+              return (
+                <Nav.Link key={t.to} as={Link} to={t.to} active={isActive}>{t.label}</Nav.Link>
+              );
+            })}
           </Nav>
         </div>
         <div className='flex-grow-1'>

@@ -2,12 +2,17 @@ import os
 from pathlib import Path
 from datetime import timedelta
 import dj_database_url
+import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-lj689gx2e0*1wpxms9&!7#v=2-fsy^7(!3mgnzo68fe8ox0d(u'
-DEBUG = os.environ.get('DJANGO_DEBUG', '0') == '1'
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost','handmadehub.onrender.com']  # Add production domain here
+# Load environment variables from .env at project root
+env = environ.Env()
+env.read_env(str(BASE_DIR / ".env"))
+
+SECRET_KEY = env("SECRET_KEY", default='django-insecure-lj689gx2e0*1wpxms9&!7#v=2-fsy^7(!3mgnzo68fe8ox0d(u')
+DEBUG = env.bool('DJANGO_DEBUG', default=False)
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', 'handmadehub.onrender.com'])
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -91,19 +96,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-else:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=f"postgres://NithinGoud:{os.environ.get('DB_PASS')}@handmadehub-identifier.c78sq0okmp1j.us-east-2.rds.amazonaws.com:5432/HandmadeHUB"
-        )
-    }
+# Always use Supabase Postgres. Provide SUPABASE_DB_URL (or DATABASE_URL) in env.
+DB_URL = env("SUPABASE_DB_URL", default=env("DATABASE_URL", default=None))
+if not DB_URL:
+    raise RuntimeError(
+        "Set SUPABASE_DB_URL or DATABASE_URL to your Supabase Postgres URL (include ?sslmode=require)."
+    )
+DATABASES = {
+    'default': dj_database_url.parse(DB_URL, conn_max_age=600, ssl_require=True)
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -121,24 +122,24 @@ USE_TZ = True
 
 # Static files settings
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles' 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Local storage for static files
 STATICFILES_DIRS = [
-    BASE_DIR / 'Frontend' / 'dist' 
+    BASE_DIR / 'Frontend' / 'dist'
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Media files settings
 MEDIA_URL = '/images/'
-MEDIA_ROOT = None  # No local storage for media files as we’re using S3
+MEDIA_ROOT = None  # Overridden in DEBUG to local path
 
 
 # AWS S3 Settings for static and media files
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = 'handmadehub-bucket'
-AWS_S3_REGION_NAME = 'us-east-2'
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default=None)
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default=None)
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default='handmadehub-bucket')
+AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='us-east-2')
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
@@ -162,18 +163,23 @@ STORAGES = {
 }
 
 # CORS settings for API access
-CORS_ALLOWED_ORIGINS = [
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
     "https://handmadehub.onrender.com",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-]
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+])
+CORS_ALLOW_CREDENTIALS = True
 
 # CSRF trusted origins (use scheme + host)
-CSRF_TRUSTED_ORIGINS = [
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
     "https://handmadehub.onrender.com",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-]
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+])
 # JWT Authentication settings
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
@@ -200,8 +206,17 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = 'DENY'
 
-# Local dev overrides for security when DEBUG is on
+# Local dev overrides when DEBUG is on
 if DEBUG:
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
+
+    # Use local filesystem storage for media in development to avoid S3 creds
+    MEDIA_ROOT = BASE_DIR / 'media'
+    STORAGES["default"] = {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {
+            "location": str(MEDIA_ROOT),
+        },
+    }

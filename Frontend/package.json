@@ -17,6 +17,7 @@
     "@tailwindcss/postcss": "^4.1.11",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "class-variance-authority": "^0.7.1",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.474.0",
     "pinch-zoom-js": "^2.3.5",

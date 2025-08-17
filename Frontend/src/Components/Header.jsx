@@ -3,14 +3,16 @@ import { Navbar, Nav, Container, NavDropdown, Form, FormControl, Button } from '
 import { LinkContainer } from 'react-router-bootstrap';
 import { FaShoppingCart, FaUser, FaSearch } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-// Use public asset path rather than importing from /public
-const logo = '/static/logo.png';
+// Brand mark used directly as SVG; keeping variable for future theming
+const logo = '/vp-mark.svg';
 import { CATALOG_SUPABASE_READS } from '../config/flags';
 import { useCart } from '../state/cartStore.jsx';
 import MiniCartDrawer from './MiniCartDrawer.jsx';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Menu, Search, ShoppingBag, User } from 'lucide-react';
+import { Heart, Globe, Menu, Search, ShoppingBag, User } from 'lucide-react';
+import { useWishlist } from '../hooks/useWishlist';
+import { formatMoney } from '../utils/money';
 
 function Header() {
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -19,6 +21,9 @@ function Header() {
   const { itemCount } = useCart();
   const [cartOpen, setCartOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { items: wishlistItems } = useWishlist();
+  const [currency, setCurrency] = useState(localStorage.getItem('currency') || 'USD');
+  useEffect(() => { localStorage.setItem('currency', currency); }, [currency]);
   const handleLogout = async () => {
     await signOut();
     navigate('/');
@@ -107,17 +112,12 @@ function Header() {
 
   return (
     <header className={`lux-header ${scrolled ? 'scrolled' : ''}`}>
-      <Navbar bg="transparent" variant="dark" expand="lg" collapseOnSelect className="custom-navbar">
-        <Container>
+      <Navbar bg="transparent" expand="lg" collapseOnSelect className={`header-editorial ${scrolled ? 'navbar-scrolled' : ''}`} fixed="top">
+        <Container className="d-flex align-items-center">
           <LinkContainer to="/">
             <Navbar.Brand>
-              <img
-                alt="Logo"
-                src={logo}
-                width="160"
-                height="auto"
-                className="d-inline-block align-top logo-padding"
-              />
+              <img alt="Vyshnavi Pelimelli logo" src="/vp-mark.svg" width="28" height="28" className="me-2"/>
+              <span className="fw-semibold" style={{letterSpacing:'.06em'}}>Vyshnavi&nbsp;Pelimelli</span>
             </Navbar.Brand>
           </LinkContainer>
           {import.meta.env.DEV && (
@@ -134,10 +134,10 @@ function Header() {
               </span>
             </div>
           )}
-          <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setMobileOpen((v) => !v)} />
-          <Navbar.Collapse id="basic-navbar-nav" className={mobileOpen ? 'show' : ''}>
-            {/* Center nav */}
-            <Nav className="mx-auto align-items-center gap-3">
+          <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setMobileOpen((v) => !v)} className="ms-auto" />
+          <Navbar.Collapse id="basic-navbar-nav" className={`flex-grow-0 ${mobileOpen ? 'show' : ''}`}>
+            {/* Center nav (desktop) */}
+            <Nav className="mx-auto align-items-center gap-3 d-none d-lg-flex">
               <div
                 className="position-relative"
                 onMouseEnter={openMenu}
@@ -197,6 +197,12 @@ function Header() {
                   )}
                 </AnimatePresence>
               </div>
+              <LinkContainer to="/wishlist">
+                <Nav.Link className="nav-item-custom d-lg-none">Wishlist</Nav.Link>
+              </LinkContainer>
+              <LinkContainer to="/cart">
+                <Nav.Link className="nav-item-custom d-lg-none">Cart</Nav.Link>
+              </LinkContainer>
               <LinkContainer to="/collection">
                 <Nav.Link className="nav-item-custom">Collections</Nav.Link>
               </LinkContainer>
@@ -204,24 +210,34 @@ function Header() {
                 <Nav.Link className="nav-item-custom">About</Nav.Link>
               </LinkContainer>
               <LinkContainer to="/contact">
-                <Nav.Link className="nav-item-custom">Contact</Nav.Link>
+                <Nav.Link className="nav-item-custom">Get In Touch</Nav.Link>
               </LinkContainer>
             </Nav>
-
-            {/* Search Bar */}
-            <Form className="d-flex me-3 search-form" onSubmit={submitHandler}>
-              <FormControl
-                type="search"
-                placeholder="Search products..."
-                className="me-2 custom-search-bar"
-                aria-label="Search"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-              />
-              <Button type="submit" variant="outline-light" className="search-button"><FaSearch /></Button>
-            </Form>
-
-            <Nav>
+            {/* Right actions */}
+            <Nav className="ms-lg-3 align-items-center">
+              <Form className="d-none d-lg-flex me-2" onSubmit={submitHandler} role="search">
+                <FormControl
+                  type="search"
+                  placeholder="Search"
+                  className="custom-search-bar"
+                  aria-label="Search"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                />
+                <Button type="submit" variant="outline-light" className="search-button ms-2"><FaSearch /></Button>
+              </Form>
+            
+              <NavDropdown title={currency} id="currency" className="ms-2 nav-item-custom">
+                {['USD','EUR','GBP','INR'].map(cur => (
+                  <NavDropdown.Item key={cur} active={currency===cur} onClick={() => setCurrency(cur)}>{cur}</NavDropdown.Item>
+                ))}
+              </NavDropdown>
+              <LinkContainer to="/wishlist">
+                <Nav.Link className="d-flex align-items-center nav-item-custom">
+                  <Heart size={18} className="me-1"/> Wishlist
+                  {wishlistItems.length > 0 && <span className="badge bg-secondary ms-1">{wishlistItems.length}</span>}
+                </Nav.Link>
+              </LinkContainer>
               <Nav.Link onClick={() => setCartOpen(true)} className="d-flex align-items-center nav-item-custom position-relative" role="button" aria-label="Open cart">
                 <ShoppingBag size={18} className="me-1" /> Cart
                 {itemCount > 0 && (

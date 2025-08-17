@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../hooks/useAuth';
 import Loader from '../Components/Loader';
 import Message from '../Components/Message';
+import axios from '../axiosInstance';
 
 export default function AdminGuard({ children }) {
   const { user, loading } = useAuth();
@@ -15,21 +15,16 @@ export default function AdminGuard({ children }) {
   useEffect(() => {
     async function check() {
       if (loading) return;
-      if (!user) {
-        navigate('/login');
-        return;
-      }
       try {
-        setChecking(true);
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', user.id)
-          .maybeSingle();
-        if (error) throw error;
-        setIsAdmin(!!data?.is_admin);
+        // bootstrap from localStorage first
+        const stored = JSON.parse(localStorage.getItem('userInfo') || 'null');
+        if (!stored || !stored.token) { navigate('/login'); return; }
+        if (stored.isAdmin) { setIsAdmin(true); setChecking(false); return; }
+        // fallback: ask backend profile
+        const { data } = await axios.get('/api/users/profile/');
+        setIsAdmin(!!data?.isAdmin);
       } catch (e) {
-        setError(e?.message || 'Failed to check admin');
+        setError(e?.response?.data?.detail || e?.message || 'Failed to check admin');
       } finally {
         setChecking(false);
       }

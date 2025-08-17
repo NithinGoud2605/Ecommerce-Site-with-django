@@ -58,6 +58,8 @@ export default {
       boxShadow: {
         card: '0 8px 24px rgba(0,0,0,0.06)',
         subtle: '0 2px 12px rgba(0,0,0,0.04)',
+        elegant: "0 20px 40px rgba(0,0,0,0.08), 0 2px 10px rgba(0,0,0,0.06)",
+        subtle: "0 1px 2px rgba(0,0,0,0.06)",
       },
       ringWidth: {
         DEFAULT: '2px',

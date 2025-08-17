@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import PinchZoom from 'pinch-zoom-js';
 
 /**
  * Gallery
@@ -100,9 +99,13 @@ export default function Gallery({ media }) {
     // Enable pinch zoom on lightbox image for mobile
     if (!zoomOpen) return;
     const el = document.querySelector('#lightbox-zoom-img');
-    if (el) {
-      try { new PinchZoom(el, { tapZoomFactor: 2, zoomOutFactor: 1.2 }); } catch {}
-    }
+    (async () => {
+      try {
+        const mod = await import('pinch-zoom-js');
+        const PinchZoom = mod?.default || mod;
+        if (el && PinchZoom) new PinchZoom(el, { tapZoomFactor: 2, zoomOutFactor: 1.2 });
+      } catch {}
+    })();
   }, [zoomOpen]);
 
   return (

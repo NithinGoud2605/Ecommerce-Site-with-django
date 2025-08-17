@@ -1,21 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Row, Col, Pagination, Form, Container } from 'react-bootstrap';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Row, Col, Pagination, Form, Button } from 'react-bootstrap';
 import axiosInstance from '../axiosInstance';
 import Product from '../Components/Product';
 import { useCatalogList } from '../hooks/useCatalogList';
 import Loader from '../Components/Loader';
 import Message from '../Components/Message';
 import Hero from '../Components/Hero';
+import LuxeHero from '../Components/LuxeHero';
 import Announcement from '../Components/Announcement';
 import FeaturedCollection from '../Components/FeaturedCollection';
 import MasonryGrid from '../Components/MasonryGrid';
+import CollectionShowcase from '../Components/CollectionShowcase';
 import { listCollections } from '../lib/catalogClient';
 import Testimonials from '../Components/Testimonials';
-import { useLocation, useNavigate } from 'react-router-dom';
+import PressStrip from '../Components/PressStrip';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import '../index.css';
-import { setMeta } from '../lib/seo.js';
+import { setMeta, preloadImage } from '../lib/seo.js';
 import { listPress } from '../lib/pressClient';
-import { useImpression } from '../hooks/useImpression';
+
+import SkeletonProductCard from '../Components/SkeletonProductCard';
 
 function HomeScreen() {
   const [products, setProducts] = useState([]);
@@ -33,8 +37,9 @@ function HomeScreen() {
 
   useEffect(() => {
     setMeta({
-      title: 'Handmade Hub – Unique, handcrafted goods',
-      description: 'Shop the latest handmade items and curated collections.',
+      title: 'Vyshnavi Pelimelli – Designer Atelier',
+      description: 'Architectural tailoring, couture drapery, and responsible materials by Vyshnavi Pelimelli.',
+      canonical: window.location.href
     });
     const fetchProducts = async () => {
       try {
@@ -44,30 +49,45 @@ function HomeScreen() {
         );
         setProducts(data.products || []);
         setPages(data.pages || 1);
-        setLoading(false);
       } catch (err) {
         console.error("Error fetching products:", err);
         setError(err.response?.data?.detail || err.message || 'Error loading products');
+      } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
+    // announce to SR users when sort/page changes
+    const region = document.getElementById('sr-results-status');
+    if (region) region.textContent = `Sorted by ${sortBy} ${order}. Page ${page}.`;
   }, [keyword, page, sortBy, order]);
 
-  // New Arrivals section powered by catalog hook (falls back automatically)
+  // New Arrivals (Supabase, falls back automatically)
   const {
     items: newItems = [],
     loading: newLoading,
   } = useCatalogList({ sort: 'newest', page: 1, pageSize: 8 });
 
+  // Best Sellers (approx via rating when sales not available)
+  const { items: bestSellers = [], loading: bestLoading } =
+    useCatalogList({ sort: 'rating_desc', page: 1, pageSize: 8 });
+
+  // Curated 4-up band
+  const { items: luxury = [], loading: luxuryLoading } =
+    useCatalogList({ gender: 'women', sort: 'newest', page: 1, pageSize: 4 });
+
   const [featured, setFeatured] = useState(null);
+  const [collections, setCollections] = useState([]);
   const [press, setPress] = useState([]);
+
   useEffect(() => {
     (async () => {
       const res = await listCollections();
       const first = Array.isArray(res) && res.length ? res[0] : null;
       setFeatured(first || null);
+      setCollections(Array.isArray(res) ? res : []);
+      if (first?.hero_media?.url) preloadImage(first.hero_media.url);
     })();
   }, []);
 
@@ -92,102 +112,183 @@ function HomeScreen() {
     navigate(`?keyword=${keyword}&page=1&sort_by=${newSortBy}&order=${newOrder}`);
   };
 
+  // JSON-LD (Website SearchAction + ItemList for Best Sellers / New Arrivals)
+  const websiteLd = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    url: window.location.origin,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${window.location.origin}/#/shop?keyword={search_term_string}`,
+      'query-input': 'required name=search_term_string'
+    }
+  }), []);
+
+  const listToItemList = (name, items) => ({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name,
+    itemListElement: (items || []).slice(0, 8).map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${window.location.origin}/#/product/${p.slug || p._id || p.id}`,
+      name: p.name
+    }))
+  });
+
+  const bestLd = useMemo(() => listToItemList('Best Sellers', bestSellers), [bestSellers]);
+  const newLd  = useMemo(() => listToItemList('New Arrivals', newItems), [newItems]);
+
+  // Small helper: skeleton grid
+  const SkeletonGrid = ({ count = 8, columns = 4, gap = 24 }) => (
+    <MasonryGrid columns={columns} gap={gap}>
+      {Array.from({ length: count }).map((_, i) => <SkeletonProductCard key={i} />)}
+    </MasonryGrid>
+  );
+
   return (
     <>
-      <Hero />
-      <Announcement items={["Limited Edition drop this Friday", "RSVP: Runway Preview", "Complimentary shipping over $200"]} />
-      <Container className="mt-5" style={{ marginTop: '8rem' }}>
-        {featured && (
-          <>
-            <h2 className="mb-4" style={{ fontFamily: 'Playfair Display, serif', fontSize:'2.25rem' }}>Featured Collection</h2>
-            <FeaturedCollection collection={featured} />
-          </>
-        )}
-      </Container>
+      {/* Screen reader live region for grid updates */}
+      <div id="sr-results-status" className="visually-hidden" aria-live="polite" />
 
-      {/* Press strip */}
-      {press.length > 0 && (
-        <div className="mt-5" aria-label="Press logos">
-          <Container>
-            <div className="d-flex flex-wrap justify-content-center align-items-center gap-4" style={{ filter: 'grayscale(100%)) contrast(0.85)', opacity: 0.8 }}>
-              {press.slice(0,8).map((p) => (
-                <a key={p.id} href={p.article_url || '#'} target="_blank" rel="noreferrer" className="d-inline-flex align-items-center" style={{ height: 40 }}>
-                  {p.hero_url ? (
-                    <img src={p.hero_url} alt={p.title} style={{ maxHeight: 40, maxWidth: 120, objectFit: 'contain' }} />
-                  ) : (
-                    <span className="text-muted" style={{ fontSize: '0.9rem' }}>{p.title}</span>
-                  )}
-                </a>
-              ))}
-            </div>
-          </Container>
-        </div>
+      <LuxeHero
+        image={featured?.hero_media?.url || `${import.meta.env.BASE_URL}images/Editorial.jpg`}
+        title={featured?.title || 'ANTHEA'}
+        subtitle={''}
+        cta={{
+          label: 'VIEW COLLECTION',
+          to: featured ? `/collection/${featured.slug}` : '/shop'
+        }}
+      />
+
+      {/* Announcement moved to App.jsx above the navbar */}
+
+      {/* Collections showcase (designer-style) */}
+      {collections.length > 0 && (
+        <CollectionShowcase
+          items={collections.slice(0, 3).map((c, idx) => ({
+            img: c?.hero_media?.url,
+            title: c.title,
+            tag: idx === 0 ? "New Drop" : idx === 1 ? "Essentials" : "Limited",
+            href: `/collection/${c.slug}`,
+          }))}
+        />
       )}
 
-      <Container id='products' className="home-screen-container mt-5" style={{ paddingTop: '2rem' }}>
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h1 className="home-title" style={{ fontFamily:'Playfair Display, serif', fontSize:'2.25rem' }}>Latest Products</h1>
-          <Form.Group controlId="sortBy" className="sort-select">
-            <Form.Label className="sort-label">Sort by:</Form.Label>
-            <Form.Control
-              as="select"
-              value={`${sortBy}_${order}`}
-              onChange={handleSortChange}
-              className="sort-dropdown"
-            >
-              <option value="name_asc">Name (A - Z)</option>
-              <option value="name_desc">Name (Z - A)</option>
-              <option value="price_asc">Price (Low to High)</option>
-              <option value="price_desc">Price (High to Low)</option>
-              <option value="rating_desc">Rating (High to Low)</option>
-              <option value="rating_asc">Rating (Low to High)</option>
-            </Form.Control>
-          </Form.Group>
+      {/* Designer manifesto (full-bleed) */}
+      <div className="full-bleed section-pad lazy-section" aria-label="Designer manifesto">
+        <div className="container-max">
+          <div style={{ maxWidth: 860 }}>
+            <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: '2.5rem', lineHeight: 1.15 }}>
+              Hand embellished elegance, crafted to turn heads
+            </h2>
+            <p className="lead text-muted" style={{ marginTop: 12 }}>
+              Each garment is individually handcrafted by our atelier. Rich textures, meticulous beadwork,
+              and silhouettes that celebrate the wearer — this is designer fashion with a soulful point of view.
+            </p>
+            <Button as={Link} to="/about" variant="outline-dark" className="rounded-1 px-4">About the House</Button>
+          </div>
         </div>
-        
-        {loading ? (
-          <Loader />
-        ) : error ? (
-          <Message variant="danger">{error}</Message>
-        ) : products.length > 0 ? (
-          <>
-            <MasonryGrid columns={4} gap={24}>
-              {products.map(product => (
-                <Product key={product._id} product={product} enableQuickAdd={true} />
-              ))}
-            </MasonryGrid>
-            {pages > 1 && (
-              <Pagination className="pagination-container mt-4">
-                {[...Array(pages).keys()].map(x => (
-                  <Pagination.Item
-                    key={x + 1}
-                    active={x + 1 === page}
-                    onClick={() => handlePageChange(x + 1)}
-                  >
-                    {x + 1}
-                  </Pagination.Item>
-                ))}
-              </Pagination>
-            )}
-          </>
-        ) : (
-          <Message variant="info">No products found</Message>
-        )}
-      </Container>
-      {/* New Arrivals strip */}
-      {newLoading && newItems.length === 0 ? (
-        <Loader />
-      ) : newItems.length > 0 ? (
-        <Container className="mt-5">
-          <h2 className="mb-4" style={{ fontFamily:'Playfair Display, serif' }}>New Arrivals</h2>
-          <MasonryGrid columns={4} gap={24}>
-            {newItems.map((p) => (
-              <Product key={p._id} product={p} enableQuickAdd={true} />
+      </div>
+
+      {/* Editorial banner (full-bleed edge-to-edge) */}
+      <section className="my-5 full-bleed" style={{ position:'relative' }} aria-label="Editorial banner">
+        <div style={{ position:'relative', width:'100%', paddingTop:'40%', overflow:'hidden' }}>
+          <div style={{ position:'absolute', inset:0, willChange:'transform', transform:'translateZ(0)' }}
+               aria-hidden="true"
+               ref={(el)=>{
+                 if(!el) return;
+                 const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                 if(reduce) { el.style.transform = 'translate3d(0,0,0)'; return; }
+                 const onScroll = () => {
+                   const rect = el.getBoundingClientRect();
+                   const dy = Math.min(1, Math.max(0, (window.innerHeight - rect.top) / (window.innerHeight + rect.height)));
+                   el.style.transform = `translate3d(0, ${dy * -20}px, 0)`;
+                 };
+                 onScroll();
+                 window.addEventListener('scroll', onScroll, { passive: true });
+                 window.addEventListener('resize', onScroll);
+                 setTimeout(onScroll, 0);
+               }}>
+            <img
+              src={featured?.hero_media?.url || `${import.meta.env.BASE_URL}images/Editorial3.jpg`}
+              alt={featured?.title || 'Editorial'}
+              sizes="100vw"
+              width="2400"
+              height="960"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </div>
+          <div className="position-absolute top-0 start-0 end-0 bottom-0" style={{ background:'rgba(0,0,0,0.25)' }} />
+          <div className="position-absolute top-50 start-0 translate-middle-y text-start px-3 px-md-5" style={{ color:'#fff', maxWidth: 720 }}>
+            <div className="text-uppercase" style={{ letterSpacing:'0.08em', opacity:0.85 }}>The Queen's Alchemy</div>
+            <h2 style={{ fontFamily:'Playfair Display, serif', fontSize:'clamp(1.75rem,4vw,2.75rem)', marginTop:8 }}>
+              A study in light, movement and hand
+            </h2>
+            <div className="d-flex gap-2 mt-2">
+              <Button as={Link} to={featured ? `/collection/${featured.slug}` : '/shop'} variant="light" className="rounded-1 px-4">
+                Shop the Collection
+              </Button>
+              <Button as={Link} to="/collection" variant="outline-light" className="rounded-1 px-4">View All</Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured collection card (full-bleed) */}
+      {/* Removed per request */}
+
+      {/* Best Sellers (full-bleed) */}
+      {/* Removed per request */}
+
+      {/* Handcrafted Luxury – 4-up band (full-bleed) */}
+      <div className="full-bleed section-pad lazy-section" aria-label="Signature pieces">
+        <div className="container-max">
+        <div className="text-center mb-4">
+          <div className="text-uppercase text-muted" style={{ letterSpacing: '0.08em', fontSize: '0.85rem' }}>Handcrafted Luxury</div>
+          <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: '2.25rem' }}>Our Signature Pieces</h2>
+        </div>
+        {luxuryLoading ? (
+          <Row className="g-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Col key={i} xs={12} sm={6} md={3}><SkeletonProductCard /></Col>
             ))}
-          </MasonryGrid>
-        </Container>
-      ) : null}
-      <Testimonials />
+          </Row>
+        ) : (
+          <Row className="g-4">
+            {(luxury || []).slice(0, 4).map((p) => (
+              <Col key={p._id || p.id} xs={12} sm={6} md={3}>
+                <Product product={p} enableQuickAdd={true} />
+              </Col>
+            ))}
+          </Row>
+        )}
+        <div className="text-center mt-3">
+          <Link
+            to="/shop"
+            className="text-decoration-none"
+            style={{
+              letterSpacing: '0.26em',
+              textTransform: 'uppercase',
+              color: '#3a3a3a',
+              fontWeight: 600,
+            }}
+          >
+            Shop
+          </Link>
+        </div>
+        </div>
+      </div>
+
+      {/* Press strip */}
+      <PressStrip items={press} />
+
+      {/* New Arrivals removed */}
+
+      {/* JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(bestLd) }} />
+      {/* New Arrivals JSON-LD removed */}
     </>
   );
 }

@@ -10,10 +10,10 @@ function AboutScreen() {
 
   if (page) {
     const hero = page.hero_url || null;
-    setMeta({ title: `${page.title || 'About'} – Handmade Hub`, description: page?.body_md?.slice(0, 140) || 'About Handmade Hub', image: hero, type: 'article' });
+    setMeta({ title: `${page.title || 'About'} – Vyshnavi Pelimelli`, description: page?.body_md?.slice(0, 140) || 'About Vyshnavi Pelimelli Atelier', image: hero, type: 'article' });
     if (hero) preloadImage(hero);
   } else {
-    setMeta({ title: 'About – Handmade Hub', description: 'About Handmade Hub' });
+    setMeta({ title: 'About – Vyshnavi Pelimelli', description: 'Vyshnavi Pelimelli Atelier' });
   }
 
   return (
@@ -55,7 +55,14 @@ function AboutScreen() {
             </Col>
             <Col md={6}>
               <div className='prose-fashion' style={{ whiteSpace:'pre-wrap' }}>
-                {page.body_md || 'We are a studio guided by craftsmanship and purpose.'}
+                {page.body_md || `A studio in pursuit of enduring forms.
+
+Guided by craftsmanship and purpose, the atelier of Vyshnavi Pelimelli explores architectural tailoring and couture drapery—quiet silhouettes with conviction. Each piece moves from drawing to toile to hand-finish, prioritising responsible materials and longevity over trend.
+
+We are coming soon.`}
+                <div className='mt-3'>
+                  <a href='https://vyshnavipelimelli.com/' target='_blank' rel='noreferrer' className='btn btn-outline-dark rounded-1 px-3'>Learn more</a>
+                </div>
               </div>
             </Col>
           </Row>

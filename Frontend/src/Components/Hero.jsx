@@ -2,14 +2,18 @@ import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 
 function Hero({
-  imageSrc = '/bgimage.png',
+  imageSrc = `${import.meta.env.BASE_URL}bgimage.png`,
   videoSrc = '',
-  headline = 'Quietly Remarkable',
-  subcopy = 'Handcrafted pieces, considered materials, enduring forms.',
+  imageAlt = '',
+  imageWidth = 2400,
+  imageHeight = 1600,
+  headline = 'The Iconic Zusi',
+  subcopy = 'Hand embellished elegance, crafted to turn heads.',
+  pretitle = 'New Collection',
   align = 'center', // 'left' | 'center' | 'right'
-  ctas = [], // [{ label, href, onClick, variant }]
+  ctas = [{ label: 'Explore the Collection', href: '/shop', variant: 'ink' }],
   marqueeItems = null, // array of strings for optional marquee below
-  height = '72vh',
+  height = '86vh',
 }) {
   const [allowMotion, setAllowMotion] = useState(true);
   useEffect(() => {
@@ -52,8 +56,8 @@ function Hero({
   }, [marqueeItems, paused, allowMotion]);
 
   return (
-    <section className="position-relative" aria-label="Hero">
-      <div style={{ position: 'relative', width: '100%', height, minHeight: 420, overflow: 'hidden' }}>
+    <section className="hero-section hero--editorial" aria-label="Hero" style={{height}}>
+      <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: 420, overflow: 'hidden' }}>
         {showVideo ? (
           <video
             src={videoSrc}
@@ -65,42 +69,42 @@ function Hero({
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
           />
         ) : (
-          <img
-            src={imageSrc}
-            alt=""
-            aria-hidden="true"
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
-          />
+          <picture>
+            <source srcSet={imageSrc.replace(/\.[^.]+$/, '.avif')} type="image/avif" />
+            <source srcSet={imageSrc.replace(/\.[^.]+$/, '.webp')} type="image/webp" />
+            <img
+              src={imageSrc}
+              alt={imageAlt}
+              width={2560}
+              height={1400}
+              decoding="async"
+              fetchpriority="high"
+              sizes="100vw"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', aspectRatio: '16/9' }}
+            />
+          </picture>
         )}
-        {/* Legibility overlays */}
-        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.45) 100%)' }} />
-        <div aria-hidden="true" className="d-md-none" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.55) 100%)' }} />
+        {/* Light overlay handled by CSS variant */}
 
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <Container>
-            <Row className={`align-items-center justify-content-${a.justify} text-${a.textAlign}`} style={{ paddingTop: '18vh' }}>
-              <Col md={10} lg={8} xl={6}>
-                <h1 style={{ fontFamily: 'Playfair Display, serif', fontWeight: 500, fontSize: 'clamp(2.25rem, 6vw, 4rem)', color: 'white', letterSpacing: '-0.01em', lineHeight: 1.1 }}>
-                  {headline}
-                </h1>
-                <p style={{ color: 'rgba(255,255,255,0.82)', fontWeight: 300, fontSize: 'clamp(1rem, 2.6vw, 1.25rem)', marginTop: 16, marginBottom: 28 }}>
-                  {subcopy}
-                </p>
-                <div className={`d-inline-flex gap-2 justify-content-${a.justify}`}>
-                  {(ctas && ctas.length > 0) ? ctas.map((c, idx) => (
-                    c.href ? (
-                      <a key={idx} href={c.href} onClick={c.onClick} className={`btn btn-${c.variant || 'light'} btn-lg`}>{c.label}</a>
-                    ) : (
-                      <button key={idx} type="button" onClick={c.onClick} className={`btn btn-${c.variant || 'light'} btn-lg`}>{c.label}</button>
-                    )
-                  )) : (
-                    <a href="#products" className="btn btn-light btn-lg" onClick={handleShopNowClick}>Shop Now</a>
-                  )}
-                </div>
-              </Col>
-            </Row>
-          </Container>
+        <div className="hero-overlay" style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ textAlign: a.textAlign, maxWidth: 820, padding: '0 1rem', margin: '0 auto' }}>
+            {pretitle && <div className="hero-pre">{pretitle}</div>}
+            <h1 className="hero-title">{headline}</h1>
+            {subcopy && <p className="hero-text">{subcopy}</p>}
+            <div className={`d-flex gap-2 justify-content-${a.justify}`} style={{marginTop:'1rem'}}>
+              {(ctas || []).map((c, i) => (
+                <a key={i} href={c.href} className={`btn ${c.variant === 'ink' ? 'btn-ink' : 'btn-ghost'}`}>{c.label}</a>
+              ))}
+            </div>
+          </div>
         </div>
+        {/* Scroll cue */}
+        <div aria-hidden={true} style={{ position:'absolute', left:'50%', bottom: 16, transform:'translateX(-50%)', color:'var(--ink)', opacity:0.9 }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ animation: allowMotion ? 'nudge 2s ease-in-out infinite' : 'none' }}>
+            <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <style>{`@keyframes nudge { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 6px); } }`}</style>
       </div>
 
       {Array.isArray(marqueeItems) && marqueeItems.length > 0 && (

@@ -1,53 +1,75 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getSession, onAuthStateChange, signInWithEmail, signOut as sbSignOut, signUpWithEmail, resetPassword as sbReset } from '../auth/authClient';
+import axios from '../axiosInstance';
+
+function getStoredUser() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('userInfo') || 'null');
+    if (stored && stored.token) {
+      return { id: stored.id, email: stored.email, isAdmin: !!stored.isAdmin };
+    }
+  } catch {}
+  return null;
+}
 
 export function useAuth() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => getStoredUser());
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Keep user in sync if another tab logs out/in
   useEffect(() => {
-    let unsub = () => {};
-    (async () => {
-      try {
-        const { data } = await getSession();
-        setUser(data?.session?.user || null);
-      } finally {
-        setLoading(false);
-      }
-    })();
-    const sub = onAuthStateChange((u) => setUser(u));
-    unsub = () => sub?.data?.subscription?.unsubscribe?.();
-    return () => unsub();
+    const onStorage = () => setUser(getStoredUser());
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   const signIn = useCallback(async (email, password) => {
-    setError(null);
-    const { user, error } = await signInWithEmail(email, password);
-    if (error) setError(error.message);
-    return { user, error };
+    setLoading(true); setError(null);
+    try {
+      const { data } = await axios.post('/api/users/login/', { username: email, password });
+      const normalized = {
+        id: data.id || data._id || data.user_id,
+        email: data.email || data.username,
+        token: data.token,
+        isAdmin: !!data.isAdmin,
+        provider: 'django',
+      };
+      localStorage.setItem('userInfo', JSON.stringify(normalized));
+      setUser({ id: normalized.id, email: normalized.email, isAdmin: normalized.isAdmin });
+      return { user: normalized, error: null };
+    } catch (e) {
+      setError(e?.response?.data?.detail || e?.message || 'Login failed');
+      return { user: null, error: e };
+    } finally { setLoading(false); }
   }, []);
 
-  const signUp = useCallback(async (email, password) => {
-    setError(null);
-    const { user, error } = await signUpWithEmail(email, password);
-    if (error) setError(error.message);
-    return { user, error };
+  const signUp = useCallback(async (name, email, password) => {
+    setLoading(true); setError(null);
+    try {
+      const { data } = await axios.post('/api/users/register/', { name, email, password });
+      const normalized = {
+        id: data.id || data._id,
+        email: data.email,
+        token: data.token,
+        isAdmin: !!data.isAdmin,
+        provider: 'django',
+      };
+      localStorage.setItem('userInfo', JSON.stringify(normalized));
+      setUser({ id: normalized.id, email: normalized.email, isAdmin: normalized.isAdmin });
+      return { user: normalized, error: null };
+    } catch (e) {
+      setError(e?.response?.data?.detail || e?.message || 'Registration failed');
+      return { user: null, error: e };
+    } finally { setLoading(false); }
   }, []);
 
   const signOut = useCallback(async () => {
     setError(null);
-    const { error } = await sbSignOut();
-    if (error) setError(error.message);
-    return { error };
+    try { localStorage.removeItem('userInfo'); setUser(null); } catch {}
+    return { error: null };
   }, []);
 
-  const resetPassword = useCallback(async (email) => {
-    setError(null);
-    const { error } = await sbReset(email);
-    if (error) setError(error.message);
-    return { error };
-  }, []);
+  const resetPassword = useCallback(async (_email) => ({ error: 'Not implemented' }), []);
 
   return { user, loading, error, signIn, signUp, signOut, resetPassword };
 }

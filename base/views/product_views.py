@@ -4,8 +4,9 @@ from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger  # Import for pagination
 from django.db.models import Q  
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from base.models import Product,Review
-from base.serializers import ProductSerializer
+from base.models import Product, Review, ProductVariant, ProductMedia, Collection, CollectionEntry, ProductMediaLink
+from base.serializers import ProductSerializer, ProductVariantSerializer, ProductMediaSerializer, CollectionSerializer, CollectionEntrySerializer, ProductMediaLinkSerializer
+from django.core.paginator import Paginator
 import logging
 
 logger = logging.getLogger(__name__)
@@ -115,6 +116,252 @@ def uploadImage(request):
         return Response(serializer.data)
     else:
         return Response({'detail': 'No image file provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Admin: variants
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def listVariants(request):
+    qs = ProductVariant.objects.all()
+    product_id = request.query_params.get('product_id')
+    if product_id:
+        qs = qs.filter(product_id=product_id)
+    sort_by = request.query_params.get('sort_by', 'product_id')
+    order = request.query_params.get('order', 'asc')
+    if order == 'desc':
+        sort_by = f'-{sort_by}'
+    qs = qs.order_by(sort_by)
+    page_size = int(request.query_params.get('page_size', 50))
+    page = int(request.query_params.get('page', 1))
+    paginator = Paginator(qs, page_size)
+    page_obj = paginator.get_page(page)
+    serializer = ProductVariantSerializer(page_obj.object_list, many=True)
+    return Response({ 'results': serializer.data, 'page': page_obj.number, 'pages': paginator.num_pages, 'count': paginator.count })
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def createVariant(request):
+    serializer = ProductVariantSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def updateVariant(request, pk):
+    variant = ProductVariant.objects.get(pk=pk)
+    serializer = ProductVariantSerializer(variant, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def deleteVariant(request, pk):
+    variant = ProductVariant.objects.get(pk=pk)
+    variant.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Admin: media
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def listMedia(request):
+    qs = ProductMedia.objects.all()
+    role = request.query_params.get('role')
+    if role:
+        qs = qs.filter(role=role)
+    sort_by = request.query_params.get('sort_by', 'position')
+    order = request.query_params.get('order', 'asc')
+    if order == 'desc':
+        sort_by = f'-{sort_by}'
+    qs = qs.order_by(sort_by)
+    page_size = int(request.query_params.get('page_size', 50))
+    page = int(request.query_params.get('page', 1))
+    paginator = Paginator(qs, page_size)
+    page_obj = paginator.get_page(page)
+    serializer = ProductMediaSerializer(page_obj.object_list, many=True, context={'request': request})
+    return Response({ 'results': serializer.data, 'page': page_obj.number, 'pages': paginator.num_pages, 'count': paginator.count })
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def createMedia(request):
+    serializer = ProductMediaSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def updateMedia(request, pk):
+    media = ProductMedia.objects.get(pk=pk)
+    serializer = ProductMediaSerializer(media, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def deleteMedia(request, pk):
+    media = ProductMedia.objects.get(pk=pk)
+    media.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Admin: collections
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def listCollections(request):
+    qs = Collection.objects.all()
+    sort_by = request.query_params.get('sort_by', 'createdAt')
+    order = request.query_params.get('order', 'desc')
+    if order == 'desc':
+        sort_by = f'-{sort_by}'
+    qs = qs.order_by(sort_by)
+    page_size = int(request.query_params.get('page_size', 50))
+    page = int(request.query_params.get('page', 1))
+    paginator = Paginator(qs, page_size)
+    page_obj = paginator.get_page(page)
+    serializer = CollectionSerializer(page_obj.object_list, many=True, context={'request': request})
+    return Response({ 'results': serializer.data, 'page': page_obj.number, 'pages': paginator.num_pages, 'count': paginator.count })
+
+
+# Admin: product-media links
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def listProductMediaLinks(request, product_pk):
+    qs = ProductMediaLink.objects.filter(product_id=product_pk).order_by('position', 'id')
+    serializer = ProductMediaLinkSerializer(qs, many=True, context={'request': request})
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def createProductMediaLink(request, product_pk):
+    data = { **request.data, 'product': product_pk }
+    serializer = ProductMediaLinkSerializer(data=data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def updateProductMediaLink(request, pk):
+    link = ProductMediaLink.objects.get(pk=pk)
+    serializer = ProductMediaLinkSerializer(link, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def deleteProductMediaLink(request, pk):
+    link = ProductMediaLink.objects.get(pk=pk)
+    link.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def reorderProductMedia(request, product_pk):
+    """
+    Accepts { order: [link_id_in_new_order...] } and rewrites position.
+    """
+    try:
+        order = request.data.get('order', [])
+        if not isinstance(order, list):
+            return Response({'detail': 'order must be a list of ids'}, status=status.HTTP_400_BAD_REQUEST)
+        for pos, link_id in enumerate(order):
+            try:
+                ProductMediaLink.objects.filter(id=link_id, product_id=product_pk).update(position=pos)
+            except Exception:
+                continue
+        qs = ProductMediaLink.objects.filter(product_id=product_pk).order_by('position', 'id')
+        serializer = ProductMediaLinkSerializer(qs, many=True, context={'request': request})
+        return Response(serializer.data)
+    except Exception as e:
+        logger.error(f"Error reordering media for product {product_pk}: {e}")
+        return Response({'detail':'Failed to reorder'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def createCollection(request):
+    serializer = CollectionSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def updateCollection(request, pk):
+    obj = Collection.objects.get(pk=pk)
+    serializer = CollectionSerializer(obj, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def deleteCollection(request, pk):
+    obj = Collection.objects.get(pk=pk)
+    obj.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def listCollectionEntries(request, collection_pk):
+    qs = CollectionEntry.objects.filter(collection_id=collection_pk).order_by('position')
+    serializer = CollectionEntrySerializer(qs, many=True, context={'request': request})
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def createCollectionEntry(request, collection_pk):
+    data = { **request.data, 'collection': collection_pk }
+    serializer = CollectionEntrySerializer(data=data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAdminUser])
+def updateCollectionEntry(request, pk):
+    entry = CollectionEntry.objects.get(pk=pk)
+    serializer = CollectionEntrySerializer(entry, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def deleteCollectionEntry(request, pk):
+    entry = CollectionEntry.objects.get(pk=pk)
+    entry.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['POST'])
